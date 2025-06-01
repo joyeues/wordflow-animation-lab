@@ -46,6 +46,8 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       return;
     }
 
+    if (chars.length === 0) return;
+
     // For blocks that start immediately (startTime: 0), we need to trigger animation right away
     const nonSpaceChars = chars.filter(char => !char.isSpace);
     const totalChars = nonSpaceChars.length;
@@ -65,7 +67,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
     // Bottom fade animation - hide when last character starts to fade in
     const lastCharTime = (totalChars - 1) * animationConfig.charFadeDelay;
     setBottomFadeVisible(currentTime < lastCharTime);
-  }, [currentTime, hasStarted, chars.length, animationConfig.charFadeDelay]);
+  }, [currentTime, hasStarted, chars.length, animationConfig.charFadeDelay, content]);
 
   return (
     <div className="relative p-6 max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer px-0 my-0 py-0 rounded-xl">
