@@ -43,7 +43,7 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
   }, [currentTime, hasStarted, content.items.length, animationConfig]);
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden max-w-2xl">
+    <div className="rounded-xl overflow-hidden max-w-2xl">
       {/* Header */}
       <div className="px-6 pt-4 pb-2">
         <h3
