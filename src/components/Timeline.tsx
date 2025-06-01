@@ -112,11 +112,11 @@ export const Timeline: React.FC<TimelineProps> = ({
         <div className="flex items-center gap-4">
           <div className="text-sm font-medium">Timeline</div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={onPlay} className="flex items-center gap-1">
+            <Button variant="secondary" size="sm" onClick={onPlay} className="flex items-center gap-1">
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               <span className="text-xs">{isPlaying ? 'Pause' : 'Play'}</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleRestart} className="flex items-center gap-1">
+            <Button variant="secondary" size="sm" onClick={handleRestart} className="flex items-center gap-1">
               <RotateCcw className="w-4 h-4" />
               <span className="text-xs">Restart</span>
             </Button>
