@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Square, RotateCcw, Pause } from 'lucide-react';
@@ -83,7 +82,8 @@ export const Timeline: React.FC<TimelineProps> = ({
   };
 
   const handleRestart = () => {
-    onSeek(0);
+    onStop(); // Always stop first
+    onSeek(0); // Then reset to beginning
   };
 
   useEffect(() => {
