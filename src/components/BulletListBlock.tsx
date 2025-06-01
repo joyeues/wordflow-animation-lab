@@ -61,7 +61,7 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
       </div>
 
       {/* List */}
-      <ul className="px-6 pb-4 space-y-2">
+      <ul className="px-6 pb-4" style={{ gap: '5px', display: 'flex', flexDirection: 'column' }}>
         {content.items.map((item, index) => (
           <li
             key={index}
@@ -73,7 +73,9 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
             style={{
               transitionTimingFunction: animationConfig.curve,
               paddingLeft: '1.2em',
-              textIndent: '-1.2em'
+              textIndent: '-1.2em',
+              wordWrap: 'break-word',
+              whiteSpace: 'normal'
             }}
           >
             <span className="font-semibold">{item.bold} – </span>
