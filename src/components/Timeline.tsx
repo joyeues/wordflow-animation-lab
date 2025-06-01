@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Square } from 'lucide-react';
+import { Play, Square, RotateCcw, Pause } from 'lucide-react';
 import type { ContentBlock } from '@/pages/Index';
 
 interface TimelineProps {
@@ -82,6 +82,10 @@ export const Timeline: React.FC<TimelineProps> = ({
     setDragType(null);
   };
 
+  const handleRestart = () => {
+    onSeek(0);
+  };
+
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
@@ -108,11 +112,13 @@ export const Timeline: React.FC<TimelineProps> = ({
         <div className="flex items-center gap-4">
           <div className="text-sm font-medium">Timeline</div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={onPlay}>
-              {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            <Button variant="outline" size="sm" onClick={onPlay} className="flex items-center gap-1">
+              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+              <span className="text-xs">{isPlaying ? 'Pause' : 'Play'}</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={onStop}>
-              <Square className="w-4 h-4" />
+            <Button variant="outline" size="sm" onClick={handleRestart} className="flex items-center gap-1">
+              <RotateCcw className="w-4 h-4" />
+              <span className="text-xs">Restart</span>
             </Button>
           </div>
         </div>
