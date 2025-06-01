@@ -2,6 +2,8 @@
 import React, { useRef, useEffect } from 'react';
 import { ParagraphBlock } from '@/components/ParagraphBlock';
 import { BulletListBlock } from '@/components/BulletListBlock';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 import type { ContentBlock, AnimationConfig } from '@/pages/Index';
 
 interface ContentPreviewProps {
@@ -10,6 +12,7 @@ interface ContentPreviewProps {
   globalConfig: AnimationConfig;
   onBlockSelect: (blockId: string | null) => void;
   selectedBlockId: string | null;
+  onBlockDelete: (blockId: string) => void;
 }
 
 export const ContentPreview: React.FC<ContentPreviewProps> = ({
@@ -17,7 +20,8 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
   currentTime,
   globalConfig,
   onBlockSelect,
-  selectedBlockId
+  selectedBlockId,
+  onBlockDelete
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastActiveBlockRef = useRef<string | null>(null);
@@ -85,6 +89,23 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                 <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity">
                   {block.type} • {block.startTime}ms - {block.startTime + block.duration}ms • {speedMultiplier.toFixed(1)}x speed
                 </div>
+
+                {/* Delete flyout */}
+                {isSelected && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onBlockDelete(block.id);
+                      }}
+                      className="h-8 w-8 p-0 shadow-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })}

@@ -1,8 +1,7 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Play, Square, RotateCcw, Pause, RotateCw } from 'lucide-react';
+import { Play, Square, RotateCcw, Pause, RotateCw, Trash2 } from 'lucide-react';
 import type { ContentBlock } from '@/pages/Index';
 
 interface TimelineProps {
@@ -13,6 +12,7 @@ interface TimelineProps {
   onBlockUpdate: (blockId: string, updates: Partial<ContentBlock>) => void;
   selectedBlockId: string | null;
   onBlockSelect: (blockId: string | null) => void;
+  onBlockDelete: (blockId: string) => void;
   isPlaying: boolean;
   onPlay: () => void;
   onStop: () => void;
@@ -28,6 +28,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   onBlockUpdate,
   selectedBlockId,
   onBlockSelect,
+  onBlockDelete,
   isPlaying,
   onPlay,
   onStop,
@@ -184,8 +185,21 @@ export const Timeline: React.FC<TimelineProps> = ({
             </div>
           </div>
         </div>
-        <div className="text-xs text-gray-400">
-          {formatTime(currentTime)} / {formatTime(totalDuration)}
+        <div className="flex items-center gap-4">
+          {selectedBlockId && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onBlockDelete(selectedBlockId)}
+              className="flex items-center gap-1"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-xs">Delete</span>
+            </Button>
+          )}
+          <div className="text-xs text-gray-400">
+            {formatTime(currentTime)} / {formatTime(totalDuration)}
+          </div>
         </div>
       </div>
 

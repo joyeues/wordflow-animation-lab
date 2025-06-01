@@ -181,6 +181,13 @@ const Index = () => {
     );
   };
 
+  const handleBlockDelete = (blockId: string) => {
+    setContentBlocks(blocks => blocks.filter(block => block.id !== blockId));
+    if (selectedBlockId === blockId) {
+      setSelectedBlockId(null);
+    }
+  };
+
   const handleAddBlock = (type: 'paragraph' | 'bulletList') => {
     const newBlock: ContentBlock = {
       id: Date.now().toString(),
@@ -255,6 +262,7 @@ const Index = () => {
                 globalConfig={globalConfig}
                 onBlockSelect={setSelectedBlockId}
                 selectedBlockId={selectedBlockId}
+                onBlockDelete={handleBlockDelete}
               />
 
               {/* Export Panel */}
@@ -279,6 +287,7 @@ const Index = () => {
             onBlockUpdate={handleBlockUpdate}
             selectedBlockId={selectedBlockId}
             onBlockSelect={setSelectedBlockId}
+            onBlockDelete={handleBlockDelete}
             isPlaying={isPlaying}
             onPlay={handlePlay}
             onStop={handleStop}
