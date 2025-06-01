@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Square, RotateCcw, Pause } from 'lucide-react';
@@ -30,8 +31,10 @@ export const Timeline: React.FC<TimelineProps> = ({
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isScrubbing, setIsScrubbing] = useState(false);
   const [draggedBlock, setDraggedBlock] = useState<string | null>(null);
   const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
 
   const pixelsPerMs = (timelineRef.current?.clientWidth || 800) / totalDuration;
 
@@ -44,41 +47,77 @@ export const Timeline: React.FC<TimelineProps> = ({
     onSeek(Math.max(0, Math.min(totalDuration, time)));
   };
 
+  const handleTimelineMouseDown = (e: React.MouseEvent) => {
+    if (!timelineRef.current || isDragging) return;
+    
+    setIsScrubbing(true);
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const time = (x / rect.width) * totalDuration;
+    onSeek(Math.max(0, Math.min(totalDuration, time)));
+  };
+
   const handleBlockMouseDown = (e: React.MouseEvent, blockId: string, type: 'move' | 'resize-start' | 'resize-end') => {
     e.stopPropagation();
     setIsDragging(true);
     setDraggedBlock(blockId);
     setDragType(type);
     onBlockSelect(blockId);
+
+    // Calculate offset for smoother dragging
+    if (type === 'move' && timelineRef.current) {
+      const rect = timelineRef.current.getBoundingClientRect();
+      const block = contentBlocks.find(b => b.id === blockId);
+      if (block) {
+        const blockStartX = (block.startTime / totalDuration) * rect.width;
+        const clickX = e.clientX - rect.left;
+        setDragOffset(clickX - blockStartX);
+      }
+    } else {
+      setDragOffset(0);
+    }
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || !draggedBlock || !timelineRef.current) return;
+    if (!timelineRef.current) return;
 
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const time = Math.round((x / rect.width) * totalDuration);
+    const time = (x / rect.width) * totalDuration;
+
+    if (isScrubbing) {
+      onSeek(Math.max(0, Math.min(totalDuration, time)));
+      return;
+    }
+
+    if (!isDragging || !draggedBlock) return;
+
     const block = contentBlocks.find(b => b.id === draggedBlock);
-    
     if (!block) return;
 
-    if (dragType === 'move') {
-      const newStartTime = Math.max(0, Math.min(totalDuration - block.duration, time - block.duration / 2));
-      onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime) });
-    } else if (dragType === 'resize-start') {
-      const newStartTime = Math.max(0, Math.min(block.startTime + block.duration - 100, time));
-      const newDuration = block.duration + (block.startTime - newStartTime);
-      onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime), duration: Math.round(newDuration) });
-    } else if (dragType === 'resize-end') {
-      const newDuration = Math.max(100, time - block.startTime);
-      onBlockUpdate(draggedBlock, { duration: Math.round(newDuration) });
-    }
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      if (dragType === 'move') {
+        const adjustedTime = time - (dragOffset / rect.width) * totalDuration;
+        const newStartTime = Math.max(0, Math.min(totalDuration - block.duration, adjustedTime));
+        onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime) });
+      } else if (dragType === 'resize-start') {
+        const newStartTime = Math.max(0, Math.min(block.startTime + block.duration - 100, time));
+        const newDuration = block.duration + (block.startTime - newStartTime);
+        onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime), duration: Math.round(newDuration) });
+      } else if (dragType === 'resize-end') {
+        const newDuration = Math.max(100, time - block.startTime);
+        onBlockUpdate(draggedBlock, { duration: Math.round(newDuration) });
+      }
+    });
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setIsScrubbing(false);
     setDraggedBlock(null);
     setDragType(null);
+    setDragOffset(0);
   };
 
   const handleRestart = () => {
@@ -87,16 +126,19 @@ export const Timeline: React.FC<TimelineProps> = ({
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging || isScrubbing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      // Prevent text selection during drag
+      document.body.style.userSelect = 'none';
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
     };
-  }, [isDragging]);
+  }, [isDragging, isScrubbing, draggedBlock, dragType, dragOffset]);
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -151,8 +193,8 @@ export const Timeline: React.FC<TimelineProps> = ({
         {/* Timeline track */}
         <div
           ref={timelineRef}
-          className="absolute top-6 left-0 right-0 bottom-0 bg-gray-800 cursor-pointer"
-          onClick={handleTimelineClick}
+          className="absolute top-6 left-0 right-0 bottom-0 bg-gray-800 cursor-pointer select-none"
+          onMouseDown={handleTimelineMouseDown}
         >
           {/* Content blocks */}
           <div className="absolute top-4 left-0 right-0 h-16">
@@ -207,7 +249,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
           {/* Playhead */}
           <div
-            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
+            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
             style={{ left: `${(currentTime / totalDuration) * 100}%` }}
           >
             <div className="absolute -top-1 -left-1.5 w-3 h-3 bg-red-500 rounded-full" />
