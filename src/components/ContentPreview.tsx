@@ -58,15 +58,8 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
               <div
                 key={block.id}
                 id={`block-${block.id}`}
-                className={`relative transition-all duration-300 cursor-pointer ${
-                  !hasStarted 
-                    ? 'opacity-0 translate-y-4' 
-                    : 'opacity-100 translate-y-0'
-                }`}
+                className="relative cursor-pointer"
                 onClick={() => onBlockSelect(block.id)}
-                style={{
-                  transitionDelay: !hasStarted ? '0ms' : `${Math.max(0, block.startTime - currentTime)}ms`
-                }}
               >
                 <div className="mx-[115px]">
                   {block.type === 'paragraph' ? (
