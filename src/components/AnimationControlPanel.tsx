@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,7 +21,8 @@ const easingCurves = [
   { value: 'cubic-bezier(0.55,0.05,0.68,0.19)', label: 'Ease In' },
   { value: 'cubic-bezier(0.68,-0.55,0.265,1.55)', label: 'Back Out' },
   { value: 'cubic-bezier(0.00,0.00,0.00,1.00)', label: 'Ease Out Expo' },
-  { value: 'linear', label: 'Linear' }
+  { value: 'linear', label: 'Linear' },
+  { value: 'custom', label: 'Custom' }
 ];
 
 export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
@@ -31,6 +31,9 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
   selectedBlock,
   onBlockUpdate
 }) => {
+  const [customGlobalCurve, setCustomGlobalCurve] = useState('');
+  const [customBlockCurve, setCustomBlockCurve] = useState('');
+
   const handleGlobalConfigChange = (key: keyof AnimationConfig, value: any) => {
     onGlobalConfigChange({ ...globalConfig, [key]: value });
   };
@@ -66,6 +69,47 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
     }
   };
 
+  const handleGlobalCurveChange = (value: string) => {
+    if (value === 'custom') {
+      // Don't change the curve yet, let user input custom value
+      return;
+    }
+    handleGlobalConfigChange('curve', value);
+  };
+
+  const handleCustomGlobalCurveSubmit = () => {
+    if (customGlobalCurve.trim()) {
+      handleGlobalConfigChange('curve', customGlobalCurve.trim());
+      setCustomGlobalCurve('');
+    }
+  };
+
+  const handleBlockCurveChange = (value: string) => {
+    if (value === 'custom') {
+      // Don't change the curve yet, let user input custom value
+      return;
+    }
+    handleBlockConfigChange('animationConfig.curve', value);
+  };
+
+  const handleCustomBlockCurveSubmit = () => {
+    if (customBlockCurve.trim()) {
+      handleBlockConfigChange('animationConfig.curve', customBlockCurve.trim());
+      setCustomBlockCurve('');
+    }
+  };
+
+  const getCurrentGlobalCurveValue = () => {
+    const predefined = easingCurves.find(curve => curve.value === globalConfig.curve && curve.value !== 'custom');
+    return predefined ? globalConfig.curve : 'custom';
+  };
+
+  const getCurrentBlockCurveValue = () => {
+    if (!selectedBlock) return '';
+    const predefined = easingCurves.find(curve => curve.value === selectedBlock.animationConfig.curve && curve.value !== 'custom');
+    return predefined ? selectedBlock.animationConfig.curve : 'custom';
+  };
+
   return (
     <div className="h-full overflow-y-auto p-4 space-y-6">
       {/* Global Controls */}
@@ -90,8 +134,8 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
           <div>
             <Label className="text-xs">Default Easing</Label>
             <Select
-              value={globalConfig.curve}
-              onValueChange={(value) => handleGlobalConfigChange('curve', value)}
+              value={getCurrentGlobalCurveValue()}
+              onValueChange={handleGlobalCurveChange}
             >
               <SelectTrigger className="mt-2">
                 <SelectValue />
@@ -104,6 +148,24 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            
+            {getCurrentGlobalCurveValue() === 'custom' && (
+              <div className="mt-2 space-y-2">
+                <Input
+                  placeholder="e.g., cubic-bezier(0.25, 0.1, 0.25, 1) or ease-in-out"
+                  value={customGlobalCurve}
+                  onChange={(e) => setCustomGlobalCurve(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCustomGlobalCurveSubmit();
+                    }
+                  }}
+                />
+                <div className="text-xs text-gray-500">
+                  Current: {globalConfig.curve}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -188,8 +250,8 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
             <div>
               <Label className="text-xs">Easing Curve</Label>
               <Select
-                value={selectedBlock.animationConfig.curve}
-                onValueChange={(value) => handleBlockConfigChange('animationConfig.curve', value)}
+                value={getCurrentBlockCurveValue()}
+                onValueChange={handleBlockCurveChange}
               >
                 <SelectTrigger className="mt-2">
                   <SelectValue />
@@ -202,6 +264,24 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+              
+              {getCurrentBlockCurveValue() === 'custom' && (
+                <div className="mt-2 space-y-2">
+                  <Input
+                    placeholder="e.g., cubic-bezier(0.25, 0.1, 0.25, 1) or ease-in-out"
+                    value={customBlockCurve}
+                    onChange={(e) => setCustomBlockCurve(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleCustomBlockCurveSubmit();
+                      }
+                    }}
+                  />
+                  <div className="text-xs text-gray-500">
+                    Current: {selectedBlock.animationConfig.curve}
+                  </div>
+                </div>
+              )}
             </div>
 
             {selectedBlock.type === 'paragraph' && (
