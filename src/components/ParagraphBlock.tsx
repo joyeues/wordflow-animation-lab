@@ -66,7 +66,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   }, [currentTime, hasStarted, chars.length, animationConfig]);
 
   return (
-    <div className="relative rounded-xl p-6 max-w-2xl">
+    <div className="relative rounded-xl p-6 max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer">
       <div 
         ref={containerRef} 
         className="relative min-h-[110px] text-gray-600 text-base leading-6"
