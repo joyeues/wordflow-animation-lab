@@ -1,11 +1,11 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimationControlPanel } from '@/components/AnimationControlPanel';
 import { ContentPreview } from '@/components/ContentPreview';
 import { Timeline } from '@/components/Timeline';
 import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/ui/button';
-import { FileCode, Play, Square, Plus } from 'lucide-react';
+import { FileCode, Plus } from 'lucide-react';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 export interface ContentBlock {
   id: string;
@@ -177,12 +177,6 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handlePlay}>
-            {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleStop}>
-            <Square className="w-4 h-4" />
-          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -195,49 +189,57 @@ const Index = () => {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex">
-        {/* Control Panel */}
-        <div className="w-80 border-r bg-white">
-          <AnimationControlPanel
-            globalConfig={globalConfig}
-            onGlobalConfigChange={setGlobalConfig}
-            selectedBlock={selectedBlockId ? contentBlocks.find(b => b.id === selectedBlockId) : null}
-            onBlockUpdate={handleBlockUpdate}
-          />
-        </div>
+      <ResizablePanelGroup direction="vertical" className="flex-1">
+        <ResizablePanel defaultSize={75} minSize={50}>
+          <div className="h-full flex">
+            {/* Control Panel */}
+            <div className="w-80 border-r bg-white">
+              <AnimationControlPanel
+                globalConfig={globalConfig}
+                onGlobalConfigChange={setGlobalConfig}
+                selectedBlock={selectedBlockId ? contentBlocks.find(b => b.id === selectedBlockId) : null}
+                onBlockUpdate={handleBlockUpdate}
+              />
+            </div>
 
-        {/* Preview Area */}
-        <div className="flex-1 relative">
-          <ContentPreview
+            {/* Preview Area */}
+            <div className="flex-1 relative">
+              <ContentPreview
+                contentBlocks={contentBlocks}
+                currentTime={currentTime}
+                globalConfig={globalConfig}
+                onBlockSelect={setSelectedBlockId}
+                selectedBlockId={selectedBlockId}
+              />
+
+              {/* Export Panel */}
+              <ExportPanel
+                isOpen={showExportPanel}
+                onClose={() => setShowExportPanel(false)}
+                contentBlocks={contentBlocks}
+                globalConfig={globalConfig}
+              />
+            </div>
+          </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        <ResizablePanel defaultSize={25} minSize={15} maxSize={50}>
+          <Timeline
             contentBlocks={contentBlocks}
             currentTime={currentTime}
-            globalConfig={globalConfig}
-            onBlockSelect={setSelectedBlockId}
+            totalDuration={totalDuration}
+            onSeek={handleTimelineSeek}
+            onBlockUpdate={handleBlockUpdate}
             selectedBlockId={selectedBlockId}
+            onBlockSelect={setSelectedBlockId}
+            isPlaying={isPlaying}
+            onPlay={handlePlay}
+            onStop={handleStop}
           />
-
-          {/* Export Panel */}
-          <ExportPanel
-            isOpen={showExportPanel}
-            onClose={() => setShowExportPanel(false)}
-            contentBlocks={contentBlocks}
-            globalConfig={globalConfig}
-          />
-        </div>
-      </div>
-
-      {/* Timeline */}
-      <div className="h-32 border-t bg-white">
-        <Timeline
-          contentBlocks={contentBlocks}
-          currentTime={currentTime}
-          totalDuration={totalDuration}
-          onSeek={handleTimelineSeek}
-          onBlockUpdate={handleBlockUpdate}
-          selectedBlockId={selectedBlockId}
-          onBlockSelect={setSelectedBlockId}
-        />
-      </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };

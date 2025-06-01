@@ -110,26 +110,26 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
             <Label className="text-xs">Character Fade Delay (ms)</Label>
             <Slider
               value={[globalConfig.charFadeDelay]}
-              onValueChange={([value]) => handleGlobalConfigChange('charFadeDelay', value)}
+              onValueChange={([value]) => handleGlobalConfigChange('charFadeDelay', Math.round(value))}
               min={1}
               max={20}
               step={1}
               className="mt-2"
             />
-            <div className="text-xs text-gray-500 mt-1">{globalConfig.charFadeDelay}ms</div>
+            <div className="text-xs text-gray-500 mt-1">{Math.round(globalConfig.charFadeDelay)}ms</div>
           </div>
 
           <div>
             <Label className="text-xs">Stagger Delay (ms)</Label>
             <Slider
               value={[globalConfig.staggerDelay]}
-              onValueChange={([value]) => handleGlobalConfigChange('staggerDelay', value)}
+              onValueChange={([value]) => handleGlobalConfigChange('staggerDelay', Math.round(value))}
               min={50}
               max={500}
               step={10}
               className="mt-2"
             />
-            <div className="text-xs text-gray-500 mt-1">{globalConfig.staggerDelay}ms</div>
+            <div className="text-xs text-gray-500 mt-1">{Math.round(globalConfig.staggerDelay)}ms</div>
           </div>
         </CardContent>
       </Card>
@@ -170,7 +170,7 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                 <Input
                   type="number"
                   value={selectedBlock.startTime}
-                  onChange={(e) => handleBlockConfigChange('startTime', parseInt(e.target.value))}
+                  onChange={(e) => handleBlockConfigChange('startTime', Math.round(parseInt(e.target.value) || 0))}
                   className="mt-2"
                 />
               </div>
@@ -179,7 +179,7 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                 <Input
                   type="number"
                   value={selectedBlock.duration}
-                  onChange={(e) => handleBlockConfigChange('duration', parseInt(e.target.value))}
+                  onChange={(e) => handleBlockConfigChange('duration', Math.round(parseInt(e.target.value) || 1000))}
                   className="mt-2"
                 />
               </div>
@@ -210,39 +210,39 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                   <Label className="text-xs">Character Fade Delay (ms)</Label>
                   <Slider
                     value={[selectedBlock.animationConfig.charFadeDelay]}
-                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.charFadeDelay', value)}
+                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.charFadeDelay', Math.round(value))}
                     min={1}
                     max={20}
                     step={1}
                     className="mt-2"
                   />
-                  <div className="text-xs text-gray-500 mt-1">{selectedBlock.animationConfig.charFadeDelay}ms</div>
+                  <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.charFadeDelay)}ms</div>
                 </div>
 
                 <div>
                   <Label className="text-xs">Mask Fade Delay (ms)</Label>
                   <Slider
                     value={[selectedBlock.animationConfig.maskFadeDelay]}
-                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.maskFadeDelay', value)}
+                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.maskFadeDelay', Math.round(value))}
                     min={0}
                     max={500}
                     step={10}
                     className="mt-2"
                   />
-                  <div className="text-xs text-gray-500 mt-1">{selectedBlock.animationConfig.maskFadeDelay}ms</div>
+                  <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.maskFadeDelay)}ms</div>
                 </div>
 
                 <div>
                   <Label className="text-xs">Mask Fade Duration (ms)</Label>
                   <Slider
                     value={[selectedBlock.animationConfig.maskFadeDuration]}
-                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.maskFadeDuration', value)}
+                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.maskFadeDuration', Math.round(value))}
                     min={100}
                     max={1000}
                     step={50}
                     className="mt-2"
                   />
-                  <div className="text-xs text-gray-500 mt-1">{selectedBlock.animationConfig.maskFadeDuration}ms</div>
+                  <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.maskFadeDuration)}ms</div>
                 </div>
               </>
             )}
@@ -252,13 +252,13 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                 <Label className="text-xs">Stagger Delay (ms)</Label>
                 <Slider
                   value={[selectedBlock.animationConfig.staggerDelay || 100]}
-                  onValueChange={([value]) => handleBlockConfigChange('animationConfig.staggerDelay', value)}
+                  onValueChange={([value]) => handleBlockConfigChange('animationConfig.staggerDelay', Math.round(value))}
                   min={50}
                   max={500}
                   step={10}
                   className="mt-2"
                 />
-                <div className="text-xs text-gray-500 mt-1">{selectedBlock.animationConfig.staggerDelay || 100}ms</div>
+                <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.staggerDelay || 100)}ms</div>
               </div>
             )}
           </CardContent>

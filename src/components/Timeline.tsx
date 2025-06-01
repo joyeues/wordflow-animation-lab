@@ -1,5 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Play, Square } from 'lucide-react';
 import type { ContentBlock } from '@/pages/Index';
 
 interface TimelineProps {
@@ -10,6 +12,9 @@ interface TimelineProps {
   onBlockUpdate: (blockId: string, updates: Partial<ContentBlock>) => void;
   selectedBlockId: string | null;
   onBlockSelect: (blockId: string | null) => void;
+  isPlaying: boolean;
+  onPlay: () => void;
+  onStop: () => void;
 }
 
 export const Timeline: React.FC<TimelineProps> = ({
@@ -19,7 +24,10 @@ export const Timeline: React.FC<TimelineProps> = ({
   onSeek,
   onBlockUpdate,
   selectedBlockId,
-  onBlockSelect
+  onBlockSelect,
+  isPlaying,
+  onPlay,
+  onStop
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -50,21 +58,21 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const time = (x / rect.width) * totalDuration;
+    const time = Math.round((x / rect.width) * totalDuration);
     const block = contentBlocks.find(b => b.id === draggedBlock);
     
     if (!block) return;
 
     if (dragType === 'move') {
       const newStartTime = Math.max(0, Math.min(totalDuration - block.duration, time - block.duration / 2));
-      onBlockUpdate(draggedBlock, { startTime: newStartTime });
+      onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime) });
     } else if (dragType === 'resize-start') {
       const newStartTime = Math.max(0, Math.min(block.startTime + block.duration - 100, time));
       const newDuration = block.duration + (block.startTime - newStartTime);
-      onBlockUpdate(draggedBlock, { startTime: newStartTime, duration: newDuration });
+      onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime), duration: Math.round(newDuration) });
     } else if (dragType === 'resize-end') {
       const newDuration = Math.max(100, time - block.startTime);
-      onBlockUpdate(draggedBlock, { duration: newDuration });
+      onBlockUpdate(draggedBlock, { duration: Math.round(newDuration) });
     }
   };
 
@@ -95,10 +103,20 @@ export const Timeline: React.FC<TimelineProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-gray-900 text-white">
-      {/* Timeline Header */}
-      <div className="h-8 border-b border-gray-700 flex items-center px-4">
-        <div className="text-sm font-medium">Timeline</div>
-        <div className="ml-auto text-xs text-gray-400">
+      {/* Timeline Header with Controls */}
+      <div className="h-12 border-b border-gray-700 flex items-center px-4 justify-between">
+        <div className="flex items-center gap-4">
+          <div className="text-sm font-medium">Timeline</div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onPlay}>
+              {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            </Button>
+            <Button variant="outline" size="sm" onClick={onStop}>
+              <Square className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="text-xs text-gray-400">
           {formatTime(currentTime)} / {formatTime(totalDuration)}
         </div>
       </div>
