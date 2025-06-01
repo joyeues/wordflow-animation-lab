@@ -64,31 +64,33 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                 <div
                   key={block.id}
                   id={`block-${block.id}`}
-                  className={`relative transition-all duration-300 ${
-                    isSelected ? 'ring-2 ring-blue-500 ring-offset-2 rounded-xl' : ''
-                  } ${!hasStarted ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}
+                  className={`relative transition-all duration-300 cursor-pointer ${
+                    !hasStarted ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+                  }`}
                   onClick={() => onBlockSelect(block.id)}
                   style={{
                     transitionDelay: !hasStarted ? '0ms' : `${Math.max(0, block.startTime - currentTime)}ms`
                   }}
                 >
-                  {block.type === 'paragraph' ? (
-                    <ParagraphBlock
-                      content={block.content as string}
-                      animationConfig={block.animationConfig}
-                      currentTime={adjustedCurrentTime}
-                      isActive={isActive}
-                      hasStarted={hasStarted}
-                    />
-                  ) : (
-                    <BulletListBlock
-                      content={block.content as { title: string; items: Array<{ bold: string; desc: string }> }}
-                      animationConfig={block.animationConfig}
-                      currentTime={adjustedCurrentTime}
-                      isActive={isActive}
-                      hasStarted={hasStarted}
-                    />
-                  )}
+                  <div className={`${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 rounded-xl' : ''}`}>
+                    {block.type === 'paragraph' ? (
+                      <ParagraphBlock
+                        content={block.content as string}
+                        animationConfig={block.animationConfig}
+                        currentTime={adjustedCurrentTime}
+                        isActive={isActive}
+                        hasStarted={hasStarted}
+                      />
+                    ) : (
+                      <BulletListBlock
+                        content={block.content as { title: string; items: Array<{ bold: string; desc: string }> }}
+                        animationConfig={block.animationConfig}
+                        currentTime={adjustedCurrentTime}
+                        isActive={isActive}
+                        hasStarted={hasStarted}
+                      />
+                    )}
+                  </div>
                   
                   {/* Block info overlay */}
                   <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity">
