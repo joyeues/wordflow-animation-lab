@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimationControlPanel } from '@/components/AnimationControlPanel';
 import { ContentPreview } from '@/components/ContentPreview';
@@ -56,11 +57,11 @@ const Index = () => {
       id: '2',
       type: 'bulletList',
       content: {
-        title: 'Skills to learn',
+        title: 'Bullet List',
         items: [
-          { bold: 'Video Editing', desc: 'For quickly creating shareable content.' },
-          { bold: 'Storyboarding and Concepting', desc: 'For product design, branding, and pitches.' },
-          { bold: 'AI Ethics and Responsible AI', desc: 'Increasingly essential as companies face regulation and reputation risk.' }
+          { bold: 'Lorem Ipsum', desc: 'Dolor sit amet consectetur adipiscing elit sed.' },
+          { bold: 'Vestibulum Consequat', desc: 'Mauris in aliquam sem fringilla ut morbi tincidunt augue interdum.' },
+          { bold: 'Pellentesque Habitant', desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'  }
         ]
       },
       startTime: 4000,
