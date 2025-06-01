@@ -88,10 +88,10 @@ const Index = () => {
 
   useEffect(() => {
     if (isPlaying) {
-      const startTime = Date.now() - currentTime;
+      const startTime = Date.now() - (currentTime / globalConfig.globalSpeed);
       
       const animate = () => {
-        const elapsed = Date.now() - startTime;
+        const elapsed = (Date.now() - startTime) * globalConfig.globalSpeed;
         if (elapsed >= totalDuration) {
           setCurrentTime(totalDuration);
           setIsPlaying(false);
@@ -113,7 +113,7 @@ const Index = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, totalDuration]);
+  }, [isPlaying, totalDuration, globalConfig.globalSpeed]);
 
   const handlePlay = () => {
     setIsPlaying(!isPlaying);
