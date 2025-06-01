@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import type { ContentBlock } from '@/pages/Index';
 
@@ -87,13 +88,13 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
         ))}
       </div>
       
-      {/* Bottom fade */}
+      {/* Bottom fade - now completely transparent */}
       <div
         className={`absolute left-0 right-0 bottom-0 h-11 pointer-events-none transition-opacity duration-600 ${animationConfig.curve} rounded-b-xl ${
           bottomFadeVisible ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 65%, #fff 100%)',
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 65%, rgba(255,255,255,0) 100%)',
           transitionTimingFunction: animationConfig.curve
         }}
       />
