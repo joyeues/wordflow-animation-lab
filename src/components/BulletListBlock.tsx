@@ -49,8 +49,8 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
         <h3
           className={`text-xl font-semibold text-gray-600 leading-8 transition-all duration-400 ${
             headerVisible 
-              ? 'opacity-100 translate-x-0' 
-              : 'opacity-0 -translate-x-7'
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-10'
           }`}
           style={{
             transitionTimingFunction: animationConfig.curve
