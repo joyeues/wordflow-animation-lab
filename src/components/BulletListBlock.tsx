@@ -47,9 +47,9 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
       {/* Header */}
       <div className="px-6 pt-4 pb-2">
         <h3
-          className={`text-xl font-semibold text-gray-600 leading-8 transition-all duration-400 ${animationConfig.curve} ${
+          className={`text-xl font-semibold text-gray-600 leading-8 transition-all duration-400 ${
             headerVisible 
-              ? 'opacity-100 transform-none' 
+              ? 'opacity-100 translate-x-0' 
               : 'opacity-0 -translate-x-7'
           }`}
           style={{
@@ -65,9 +65,9 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
         {content.items.map((item, index) => (
           <li
             key={index}
-            className={`text-gray-600 leading-6 list-disc list-inside transition-all duration-400 ${animationConfig.curve} ${
+            className={`text-gray-600 leading-6 list-disc list-inside transition-all duration-400 ${
               itemsVisible[index]
-                ? 'opacity-100 transform-none'
+                ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-10'
             }`}
             style={{
