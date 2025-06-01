@@ -7,13 +7,15 @@ interface ParagraphBlockProps {
   animationConfig: ContentBlock['animationConfig'];
   currentTime: number;
   isActive: boolean;
+  hasStarted: boolean;
 }
 
 export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   content,
   animationConfig,
   currentTime,
-  isActive
+  isActive,
+  hasStarted
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [chars, setChars] = useState<Array<{ char: string; isSpace: boolean; visible: boolean }>>([]);
@@ -30,7 +32,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   }, [content]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!hasStarted) {
       // Reset animation state
       setChars(prev => prev.map(char => ({ ...char, visible: false })));
       setBottomFadeVisible(true);
@@ -59,7 +61,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
     const lastCharTime = (totalChars - 1) * animationConfig.charFadeDelay;
     setBottomFadeVisible(currentTime < lastCharTime);
 
-  }, [currentTime, isActive, chars.length, animationConfig]);
+  }, [currentTime, hasStarted, chars.length, animationConfig]);
 
   return (
     <div className="relative bg-white rounded-xl p-6 max-w-2xl">

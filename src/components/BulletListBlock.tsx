@@ -7,19 +7,21 @@ interface BulletListBlockProps {
   animationConfig: ContentBlock['animationConfig'];
   currentTime: number;
   isActive: boolean;
+  hasStarted: boolean;
 }
 
 export const BulletListBlock: React.FC<BulletListBlockProps> = ({
   content,
   animationConfig,
   currentTime,
-  isActive
+  isActive,
+  hasStarted
 }) => {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [itemsVisible, setItemsVisible] = useState<boolean[]>([]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!hasStarted) {
       setHeaderVisible(false);
       setItemsVisible(content.items.map(() => false));
       return;
@@ -38,7 +40,7 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
     });
 
     setItemsVisible(newItemsVisible);
-  }, [currentTime, isActive, content.items.length, animationConfig]);
+  }, [currentTime, hasStarted, content.items.length, animationConfig]);
 
   return (
     <div className="bg-white rounded-xl overflow-hidden max-w-2xl">

@@ -57,8 +57,8 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
             .map((block, index) => {
               const adjustedCurrentTime = Math.max(0, currentTime - block.startTime) / globalConfig.globalSpeed;
               const isActive = currentTime >= block.startTime && currentTime <= block.startTime + block.duration;
-              const isSelected = selectedBlockId === block.id;
               const hasStarted = currentTime >= block.startTime;
+              const isSelected = selectedBlockId === block.id;
 
               return (
                 <div
@@ -78,6 +78,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                       animationConfig={block.animationConfig}
                       currentTime={adjustedCurrentTime}
                       isActive={isActive}
+                      hasStarted={hasStarted}
                     />
                   ) : (
                     <BulletListBlock
@@ -85,6 +86,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                       animationConfig={block.animationConfig}
                       currentTime={adjustedCurrentTime}
                       isActive={isActive}
+                      hasStarted={hasStarted}
                     />
                   )}
                   
