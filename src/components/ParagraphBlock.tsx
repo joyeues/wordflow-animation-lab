@@ -67,7 +67,14 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
 
   return (
     <div className="relative rounded-xl p-6 max-w-2xl">
-      <div ref={containerRef} className="relative min-h-[110px] text-gray-600 text-base leading-6">
+      <div 
+        ref={containerRef} 
+        className="relative min-h-[110px] text-gray-600 text-base leading-6"
+        style={{
+          wordWrap: 'break-word',
+          whiteSpace: 'normal'
+        }}
+      >
         {chars.map((char, index) => (
           char.isSpace ? (
             <span key={index}> </span>
