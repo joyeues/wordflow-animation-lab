@@ -43,7 +43,7 @@ const Index = () => {
       id: '1',
       type: 'paragraph',
       content: 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.',
-      startTime: 0,
+      startTime: 200,
       duration: 3000,
       animationConfig: {
         charFadeDelay: 4,
