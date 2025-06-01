@@ -38,6 +38,7 @@ const Index = () => {
   const [totalDuration, setTotalDuration] = useState(10000); // 10 seconds
   const [showExportPanel, setShowExportPanel] = useState(false);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [isLooping, setIsLooping] = useState(true);
   
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
     {
@@ -94,8 +95,51 @@ const Index = () => {
       const animate = () => {
         const elapsed = (Date.now() - startTime) * globalConfig.globalSpeed;
         if (elapsed >= totalDuration) {
-          setCurrentTime(totalDuration);
-          setIsPlaying(false);
+          if (isLooping) {
+            // Reset to beginning and continue playing
+            setCurrentTime(0);
+            const newStartTime = Date.now();
+            const animateLoop = () => {
+              const newElapsed = (Date.now() - newStartTime) * globalConfig.globalSpeed;
+              if (newElapsed >= totalDuration) {
+                if (isLooping && isPlaying) {
+                  setCurrentTime(0);
+                  // Recursively restart the loop
+                  setTimeout(() => {
+                    if (isPlaying && isLooping) {
+                      const restartTime = Date.now();
+                      const restartAnimate = () => {
+                        const restartElapsed = (Date.now() - restartTime) * globalConfig.globalSpeed;
+                        if (restartElapsed >= totalDuration) {
+                          if (isLooping && isPlaying) {
+                            setCurrentTime(0);
+                            animationRef.current = requestAnimationFrame(() => restartAnimate());
+                          } else {
+                            setCurrentTime(totalDuration);
+                            setIsPlaying(false);
+                          }
+                        } else {
+                          setCurrentTime(restartElapsed);
+                          animationRef.current = requestAnimationFrame(restartAnimate);
+                        }
+                      };
+                      animationRef.current = requestAnimationFrame(restartAnimate);
+                    }
+                  }, 50);
+                } else {
+                  setCurrentTime(totalDuration);
+                  setIsPlaying(false);
+                }
+              } else {
+                setCurrentTime(newElapsed);
+                animationRef.current = requestAnimationFrame(animateLoop);
+              }
+            };
+            animationRef.current = requestAnimationFrame(animateLoop);
+          } else {
+            setCurrentTime(totalDuration);
+            setIsPlaying(false);
+          }
         } else {
           setCurrentTime(elapsed);
           animationRef.current = requestAnimationFrame(animate);
@@ -114,7 +158,7 @@ const Index = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, totalDuration, globalConfig.globalSpeed]);
+  }, [isPlaying, totalDuration, globalConfig.globalSpeed, isLooping]);
 
   const handlePlay = () => {
     setIsPlaying(!isPlaying);
@@ -238,6 +282,8 @@ const Index = () => {
             isPlaying={isPlaying}
             onPlay={handlePlay}
             onStop={handleStop}
+            isLooping={isLooping}
+            onLoopToggle={setIsLooping}
           />
         </ResizablePanel>
       </ResizablePanelGroup>

@@ -1,7 +1,8 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Square, RotateCcw, Pause } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Play, Square, RotateCcw, Pause, RotateCw } from 'lucide-react';
 import type { ContentBlock } from '@/pages/Index';
 
 interface TimelineProps {
@@ -15,6 +16,8 @@ interface TimelineProps {
   isPlaying: boolean;
   onPlay: () => void;
   onStop: () => void;
+  isLooping: boolean;
+  onLoopToggle: (isLooping: boolean) => void;
 }
 
 export const Timeline: React.FC<TimelineProps> = ({
@@ -27,7 +30,9 @@ export const Timeline: React.FC<TimelineProps> = ({
   onBlockSelect,
   isPlaying,
   onPlay,
-  onStop
+  onStop,
+  isLooping,
+  onLoopToggle
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,7 +53,13 @@ export const Timeline: React.FC<TimelineProps> = ({
   };
 
   const handleTimelineMouseDown = (e: React.MouseEvent) => {
-    if (!timelineRef.current || isDragging) return;
+    if (!timelineRef.current) return;
+    
+    // Check if we're clicking on a block
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-block-id]')) {
+      return; // Let block handling take precedence
+    }
     
     setIsScrubbing(true);
     const rect = timelineRef.current.getBoundingClientRect();
@@ -85,7 +96,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     const x = e.clientX - rect.left;
     const time = (x / rect.width) * totalDuration;
 
-    if (isScrubbing) {
+    if (isScrubbing && !isDragging) {
       onSeek(Math.max(0, Math.min(totalDuration, time)));
       return;
     }
@@ -162,6 +173,15 @@ export const Timeline: React.FC<TimelineProps> = ({
               <RotateCcw className="w-4 h-4" />
               <span className="text-xs">Restart</span>
             </Button>
+            <div className="flex items-center gap-2 ml-2">
+              <RotateCw className="w-4 h-4 text-gray-400" />
+              <Switch
+                checked={isLooping}
+                onCheckedChange={onLoopToggle}
+                className="data-[state=checked]:bg-blue-600"
+              />
+              <span className="text-xs text-gray-400">Loop</span>
+            </div>
           </div>
         </div>
         <div className="text-xs text-gray-400">
@@ -206,6 +226,7 @@ export const Timeline: React.FC<TimelineProps> = ({
               return (
                 <div
                   key={block.id}
+                  data-block-id={block.id}
                   className={`absolute h-12 rounded cursor-pointer transition-all ${
                     isSelected 
                       ? 'ring-2 ring-blue-400 bg-blue-500' 
