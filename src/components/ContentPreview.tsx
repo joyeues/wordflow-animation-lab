@@ -72,7 +72,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                     transitionDelay: !hasStarted ? '0ms' : `${Math.max(0, block.startTime - currentTime)}ms`
                   }}
                 >
-                  <div className={`${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 rounded-xl' : ''}`}>
+                  <div className={`${isSelected ? 'ring-2 ring-blue-500 rounded-xl' : ''}`}>
                     {block.type === 'paragraph' ? (
                       <ParagraphBlock
                         content={block.content as string}
