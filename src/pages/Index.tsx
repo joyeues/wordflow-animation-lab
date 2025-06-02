@@ -243,7 +243,7 @@ const Index = () => {
       };
     } else if (type === 'chart') {
       newContent = {
-        chartType: 'pie' as const,
+        chartType: 'doughnut' as const,
         data: {
           labels: ['January', 'February', 'March', 'April', 'May'],
           datasets: [{

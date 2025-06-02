@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -48,16 +48,32 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   className 
 }) => {
   const { chartType, data, options } = content;
+  const chartRef = useRef<any>(null);
+
+  // Trigger animation when the block becomes active
+  useEffect(() => {
+    if (isActive && chartRef.current) {
+      // Force re-render with animation when it's time
+      chartRef.current.update('active');
+    }
+  }, [isActive]);
 
   const renderChart = () => {
     const chartProps = { 
+      ref: chartRef,
       data, 
       options: {
         ...options,
         animation: {
-          duration: 1000, // Enable Chart.js native animations
-          easing: 'easeOutQuart'
-        }
+          duration: 1000,
+          easing: 'easeOutSine',
+          // Only animate when the block is active
+          animateRotate: true,
+          animateScale: true
+        },
+        // Force animation on update
+        responsive: true,
+        maintainAspectRatio: false
       }
     };
     
@@ -71,7 +87,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
       case 'doughnut':
         return <Doughnut {...chartProps} />;
       default:
-        return <Pie {...chartProps} />;
+        return <Doughnut {...chartProps} />;
     }
   };
 
