@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -49,35 +49,30 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
 }) => {
   const { chartType, data, options } = content;
   const chartRef = useRef<any>(null);
-  const hasAnimatedRef = useRef(false);
-  const forceAnimationRef = useRef(false);
+  const [shouldRender, setShouldRender] = useState(false);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-  // Reset animation when block becomes inactive
+  // Only show chart when it becomes active
   useEffect(() => {
-    if (!isActive) {
-      hasAnimatedRef.current = false;
-      forceAnimationRef.current = false;
-    }
-  }, [isActive]);
-
-  // Trigger animation when the block becomes active for the first time
-  useEffect(() => {
-    if (isActive && !hasAnimatedRef.current) {
-      hasAnimatedRef.current = true;
-      forceAnimationRef.current = true;
-      
-      // Use a timeout to ensure the chart is fully mounted before triggering animation
-      const timeoutId = setTimeout(() => {
-        if (chartRef.current && forceAnimationRef.current) {
-          // Trigger animation by updating the chart
-          chartRef.current.update('active');
-          forceAnimationRef.current = false;
-        }
+    if (isActive && !shouldRender) {
+      setShouldRender(true);
+      // Trigger animation after a short delay to ensure chart is mounted
+      setTimeout(() => {
+        setTriggerAnimation(true);
       }, 100);
-
-      return () => clearTimeout(timeoutId);
+    } else if (!isActive && shouldRender) {
+      setShouldRender(false);
+      setTriggerAnimation(false);
     }
-  }, [isActive]);
+  }, [isActive, shouldRender]);
+
+  // Trigger chart animation when needed
+  useEffect(() => {
+    if (triggerAnimation && chartRef.current) {
+      chartRef.current.update('active');
+      setTriggerAnimation(false);
+    }
+  }, [triggerAnimation]);
 
   const renderChart = () => {
     const chartProps = { 
@@ -109,6 +104,11 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
         return <Doughnut {...chartProps} />;
     }
   };
+
+  // Don't render anything if the block shouldn't be visible
+  if (!shouldRender) {
+    return null;
+  }
 
   return (
     <div 
