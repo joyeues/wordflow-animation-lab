@@ -92,13 +92,16 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   }, [triggerAnimation]);
 
   const renderChart = () => {
+    // Time the chart animation to complete within the block duration
+    const chartAnimationDuration = Math.min(duration * 0.6, 1200); // Use 60% of block duration, max 1.2s
+    
     const chartProps = { 
       ref: chartRef,
       data, 
       options: {
         ...options,
         animation: {
-          duration: 400, // Fixed 400ms animation duration
+          duration: chartAnimationDuration, // Dynamic animation duration based on block duration
           easing: 'easeOutSine',
           animateRotate: true,
           animateScale: true

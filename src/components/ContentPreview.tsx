@@ -77,6 +77,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                   animationConfig={block.animationConfig}
                   isActive={isActive}
                   hasStarted={hasStarted}
+                  duration={block.duration}
                 />
               )}
 
@@ -87,6 +88,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                   animationConfig={block.animationConfig}
                   isActive={isActive}
                   hasStarted={hasStarted}
+                  duration={block.duration}
                 />
               )}
 

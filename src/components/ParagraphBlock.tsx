@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import type { ContentBlock } from '@/pages/Index';
 
@@ -66,14 +67,17 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
     }
 
     if (animationType === 'character') {
-      // Character-by-character animation (existing)
+      // Character-by-character animation timed to complete by duration end
       if (chars.length === 0) return;
 
       const nonSpaceChars = chars.filter(char => !char.isSpace);
+      const totalAnimationTime = duration * 0.8; // Use 80% of duration for character reveals
+      const charDelay = totalAnimationTime / nonSpaceChars.length;
+      
       const updatedChars = chars.map((char, index) => {
         if (char.isSpace) return char;
         const nonSpaceIndex = chars.slice(0, index).filter(c => !c.isSpace).length;
-        const charStartTime = nonSpaceIndex * animationConfig.charFadeDelay;
+        const charStartTime = nonSpaceIndex * charDelay;
         return {
           ...char,
           visible: currentTime >= charStartTime
@@ -82,11 +86,14 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setChars(updatedChars);
 
     } else if (animationType === 'word') {
-      // Word streaming animation
+      // Word streaming animation timed to complete by duration end
       if (words.length === 0) return;
 
+      const totalAnimationTime = duration * 0.8; // Use 80% of duration for word reveals
+      const wordDelay = totalAnimationTime / words.length;
+      
       const updatedWords = words.map((word, index) => {
-        const wordStartTime = index * (animationConfig.charFadeDelay * 3); // Slower than character animation
+        const wordStartTime = index * wordDelay;
         return {
           ...word,
           visible: currentTime >= wordStartTime

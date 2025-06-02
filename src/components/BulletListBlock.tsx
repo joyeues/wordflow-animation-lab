@@ -8,6 +8,7 @@ interface BulletListBlockProps {
   currentTime: number;
   isActive: boolean;
   hasStarted: boolean;
+  duration: number; // Add duration prop
 }
 
 export const BulletListBlock: React.FC<BulletListBlockProps> = ({
@@ -15,7 +16,8 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
   animationConfig,
   currentTime,
   isActive,
-  hasStarted
+  hasStarted,
+  duration
 }) => {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [itemsVisible, setItemsVisible] = useState<boolean[]>([]);
@@ -28,20 +30,22 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
       return;
     }
 
+    // Calculate timing to complete animation by duration end
+    const totalItems = content.items.length + 1; // +1 for header
+    const totalAnimationTime = duration * 0.8; // Use 80% of duration
+    const itemDelay = totalAnimationTime / totalItems;
+
     // Header animation (starts immediately)
     setHeaderVisible(currentTime >= 0);
 
-    // Items animation (starts after delay, then staggered)
-    const headerDelay = animationConfig.maskFadeDelay || 200;
-    const staggerDelay = animationConfig.staggerDelay || 100;
-
+    // Items animation - evenly distributed across remaining time
     const newItemsVisible = content.items.map((_, index) => {
-      const itemStartTime = headerDelay + (index * staggerDelay);
+      const itemStartTime = itemDelay * (index + 1); // +1 because header takes first slot
       return currentTime >= itemStartTime;
     });
 
     setItemsVisible(newItemsVisible);
-  }, [currentTime, hasStarted, content, content?.items?.length, animationConfig]);
+  }, [currentTime, hasStarted, content, content?.items?.length, animationConfig, duration]);
 
   // Safety check - don't render if content is invalid
   if (!content || !content.items) {
