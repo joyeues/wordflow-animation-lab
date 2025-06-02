@@ -131,7 +131,6 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                       currentTime={adjustedCurrentTime}
                       isActive={isActive}
                       hasStarted={hasStarted}
-                      className="transition-all duration-500"
                     />
                   )}
                 </div>

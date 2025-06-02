@@ -77,9 +77,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
 
   return (
     <div 
-      className={`chart-block transition-all duration-500 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      } ${className || ''}`}
+      className={`chart-block ${className || ''}`}
       style={{ 
         height: '400px', 
         width: '100%'
