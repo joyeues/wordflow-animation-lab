@@ -4,17 +4,30 @@ import { ContentPreview } from '@/components/ContentPreview';
 import { Timeline } from '@/components/Timeline';
 import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/ui/button';
-import { FileCode, Plus } from 'lucide-react';
+import { FileCode, Plus, BarChart3 } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 export interface ContentBlock {
   id: string;
-  type: 'paragraph' | 'bulletList';
+  type: 'paragraph' | 'bulletList' | 'chart';
   content: string | {
     title: string;
     items: Array<{
       bold: string;
       desc: string;
     }>;
+  } | {
+    chartType: 'bar' | 'line' | 'pie' | 'doughnut';
+    data: {
+      labels: string[];
+      datasets: Array<{
+        label: string;
+        data: number[];
+        backgroundColor?: string | string[];
+        borderColor?: string | string[];
+        borderWidth?: number;
+      }>;
+    };
+    options?: any;
   };
   startTime: number;
   duration: number;
@@ -209,11 +222,13 @@ const Index = () => {
       setSelectedBlockIds([blockId]);
     }
   };
-  const handleAddBlock = (type: 'paragraph' | 'bulletList') => {
-    const newBlock: ContentBlock = {
-      id: Date.now().toString(),
-      type,
-      content: type === 'paragraph' ? 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.' : {
+  const handleAddBlock = (type: 'paragraph' | 'bulletList' | 'chart') => {
+    let newContent;
+    
+    if (type === 'paragraph') {
+      newContent = 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.';
+    } else if (type === 'bulletList') {
+      newContent = {
         title: 'Bullet List',
         items: [{
           bold: 'Lorem Ipsum',
@@ -225,7 +240,39 @@ const Index = () => {
           bold: 'Pellentesque Habitant',
           desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'
         }]
-      },
+      };
+    } else if (type === 'chart') {
+      newContent = {
+        chartType: 'bar' as const,
+        data: {
+          labels: ['January', 'February', 'March', 'April', 'May'],
+          datasets: [{
+            label: 'Sales Data',
+            data: [12, 19, 3, 5, 2],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top' as const,
+            },
+            title: {
+              display: true,
+              text: 'Sample Chart'
+            }
+          }
+        }
+      };
+    }
+
+    const newBlock: ContentBlock = {
+      id: Date.now().toString(),
+      type,
+      content: newContent,
       startTime: Math.max(...contentBlocks.map(b => b.startTime + b.duration), 0),
       duration: 3000,
       animationConfig: {
@@ -250,6 +297,10 @@ const Index = () => {
             <Button variant="outline" size="sm" onClick={() => handleAddBlock('bulletList')}>
               <Plus className="w-4 h-4 mr-2" />
               Bullet List
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleAddBlock('chart')}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Chart
             </Button>
           </div>
         </div>
