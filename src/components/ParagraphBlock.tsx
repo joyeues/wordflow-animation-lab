@@ -157,23 +157,25 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       </span>
       {gleamVisible && (
         <div 
-          className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
-            animation: 'gleam-sweep 800ms ease-out'
-          }}
+          className="absolute inset-0 pointer-events-none overflow-hidden gleam-effect"
         />
       )}
-      <style jsx>{`
-        @keyframes gleam-sweep {
-          0% {
-            transform: translateX(-100%);
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .gleam-effect {
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+            animation: gleam-sweep 800ms ease-out;
           }
-          100% {
-            transform: translateX(100%);
+          @keyframes gleam-sweep {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(100%);
+            }
           }
-        }
-      `}</style>
+        `
+      }} />
     </div>
   );
 

@@ -6,6 +6,7 @@ import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/ui/button';
 import { FileCode, Plus, BarChart3 } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+
 export interface ContentBlock {
   id: string;
   type: 'paragraph' | 'bulletList' | 'chart';
@@ -37,8 +38,10 @@ export interface ContentBlock {
     maskFadeDuration: number;
     staggerDelay?: number;
     curve: string;
+    textAnimationType?: 'character' | 'word' | 'gleam';
   };
 }
+
 export interface AnimationConfig {
   globalSpeed: number;
   curve: string;
@@ -47,6 +50,7 @@ export interface AnimationConfig {
   maskFadeDuration: number;
   staggerDelay: number;
 }
+
 const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
