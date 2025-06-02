@@ -81,6 +81,7 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="cubic-bezier(0,0,0,1)">Ease In Strong</SelectItem>
                 <SelectItem value="cubic-bezier(0.45,0,0.58,1)">Ease Out</SelectItem>
                 <SelectItem value="cubic-bezier(0.00,0.00,0.00,1.00)">Ease In</SelectItem>
                 <SelectItem value="cubic-bezier(0.45,0.45,0.55,1)">Ease In Out</SelectItem>
@@ -220,6 +221,7 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="cubic-bezier(0,0,0,1)">Ease In Strong</SelectItem>
                       <SelectItem value="cubic-bezier(0.45,0,0.58,1)">Ease Out</SelectItem>
                       <SelectItem value="cubic-bezier(0.00,0.00,0.00,1.00)">Ease In</SelectItem>
                       <SelectItem value="cubic-bezier(0.45,0.45,0.55,1)">Ease In Out</SelectItem>

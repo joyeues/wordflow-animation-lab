@@ -98,7 +98,7 @@ const Index = () => {
   }]);
   const [globalConfig, setGlobalConfig] = useState<AnimationConfig>({
     globalSpeed: 1,
-    curve: 'cubic-bezier(0.45,0,0.58,1)',
+    curve: 'cubic-bezier(0,0,0,1)', // Changed default to cubic-bezier(0,0,0,1)
     charFadeDelay: 4,
     maskFadeDelay: 100,
     maskFadeDuration: 200,
@@ -292,7 +292,8 @@ const Index = () => {
       startTime: Math.max(...contentBlocks.map(b => b.startTime + b.duration), 0),
       duration: 3000,
       animationConfig: {
-        ...globalConfig
+        ...globalConfig,
+        curve: 'cubic-bezier(0,0,0,1)' // Set default curve for new blocks
       }
     };
     setContentBlocks([...contentBlocks, newBlock]);
