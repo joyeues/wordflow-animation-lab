@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import type { ContentBlock } from '@/pages/Index';
 
@@ -93,11 +94,11 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setWords(updatedWords);
 
     } else if (animationType === 'gleam') {
-      // Gleam animation - text appears first, then gleam effect
-      setTextVisible(currentTime >= 0);
-      const gleamStartTime = 300; // Start gleam after 300ms
-      const gleamDuration = 1500; // Increased duration for slower gleam
+      // Gleam animation - text reveals with gleam effect
+      const gleamStartTime = 0;
+      const gleamDuration = 1500;
       setGleamVisible(currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration);
+      setTextVisible(currentTime >= gleamStartTime);
     }
   }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length]);
 
@@ -148,7 +149,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   const renderGleamAnimation = () => (
     <div className="relative">
       <span 
-        className={`transition-opacity duration-500 ${gleamVisible ? 'gleam-text' : ''} ${
+        className={`transition-opacity duration-300 ${gleamVisible ? 'gleam-text' : ''} ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -158,20 +159,22 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
         __html: `
           .gleam-text {
             background: linear-gradient(90deg, 
-              #374151 0%, 
-              #374151 20%, 
+              transparent 0%, 
+              transparent 20%, 
+              #374151 30%,
               #7dd3fc 40%, 
               #a78bfa 60%, 
-              #374151 80%, 
-              #374151 100%
+              #374151 70%,
+              transparent 80%, 
+              transparent 100%
             );
             background-size: 300% 100%;
             background-clip: text;
             -webkit-background-clip: text;
-            color: transparent;
-            animation: gleam-sweep 1500ms ease-out;
+            color: #374151;
+            animation: gleam-reveal 1500ms ease-out;
           }
-          @keyframes gleam-sweep {
+          @keyframes gleam-reveal {
             0% {
               background-position: -300% 0%;
             }
