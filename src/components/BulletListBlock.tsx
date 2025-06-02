@@ -51,7 +51,7 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
   return (
     <div className="rounded-xl overflow-hidden max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer">
       {/* Header */}
-      <div className="px-6 pt-4 pb-2">
+      <div className="px-6 pb-2">
         <h3
           className={`text-xl font-semibold text-gray-600 leading-8 transition-all duration-400 ${
             headerVisible 
