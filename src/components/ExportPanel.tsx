@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { X, Copy, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { ContentBlock, AnimationConfig } from '@/pages/Index';
@@ -22,8 +24,104 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   globalConfig
 }) => {
   const [selectedFormat, setSelectedFormat] = useState<'component' | 'hooks' | 'config'>('component');
+  const [animationOnly, setAnimationOnly] = useState(false);
+
+  const generateAnimationData = () => {
+    const animationBlocks = contentBlocks.map(block => ({
+      id: block.id,
+      type: block.type,
+      startTime: block.startTime,
+      duration: block.duration,
+      animationConfig: block.animationConfig
+    }));
+
+    return {
+      globalConfig,
+      contentBlocks: animationBlocks,
+      totalDuration: Math.max(...contentBlocks.map(b => b.startTime + b.duration), 0)
+    };
+  };
 
   const generateReactComponent = () => {
+    if (animationOnly) {
+      return `// Animation-only React Component
+import React, { useState, useEffect } from 'react';
+
+const AnimationController = () => {
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Animation configuration data
+  const animationData = ${JSON.stringify(generateAnimationData(), null, 2)};
+
+  useEffect(() => {
+    let animationFrame: number;
+    
+    if (isPlaying) {
+      const startTime = Date.now() - currentTime;
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        setCurrentTime(elapsed);
+        
+        if (elapsed < animationData.totalDuration) {
+          animationFrame = requestAnimationFrame(animate);
+        } else {
+          setIsPlaying(false);
+        }
+      };
+      
+      animationFrame = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [isPlaying, animationData.totalDuration]);
+
+  const getActiveBlocks = () => {
+    return animationData.contentBlocks.filter(block => 
+      currentTime >= block.startTime && 
+      currentTime <= block.startTime + block.duration
+    );
+  };
+
+  const getBlockProgress = (block: any) => {
+    const adjustedTime = Math.max(0, currentTime - block.startTime);
+    return Math.min(1, adjustedTime / block.duration);
+  };
+
+  return (
+    <div className="animation-controller">
+      <div className="controls mb-4">
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
+        <span className="ml-4">Time: {Math.round(currentTime)}ms</span>
+      </div>
+      
+      <div className="active-animations">
+        {getActiveBlocks().map((block) => (
+          <div key={block.id} className="animation-block mb-2 p-2 border rounded">
+            <div>Block ID: {block.id}</div>
+            <div>Type: {block.type}</div>
+            <div>Progress: {Math.round(getBlockProgress(block) * 100)}%</div>
+            <div>Config: {JSON.stringify(block.animationConfig)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default AnimationController;`;
+    }
+
     return `import React, { useState, useEffect } from 'react';
 
 // Animated text component
@@ -166,6 +264,94 @@ export default AnimatedTextStudio;`;
   };
 
   const generateHooks = () => {
+    if (animationOnly) {
+      return `// Animation-only Custom Hooks
+import { useState, useEffect, useRef } from 'react';
+
+// Animation configuration
+const ANIMATION_CONFIG = ${JSON.stringify(generateAnimationData(), null, 2)};
+
+// Custom hook for timeline animation control with precise timing
+export const useAnimationTimeline = () => {
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    if (isPlaying) {
+      const startTime = Date.now() - currentTime;
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= ANIMATION_CONFIG.totalDuration) {
+          setCurrentTime(ANIMATION_CONFIG.totalDuration);
+          setIsPlaying(false);
+        } else {
+          setCurrentTime(elapsed);
+          animationRef.current = requestAnimationFrame(animate);
+        }
+      };
+      
+      animationRef.current = requestAnimationFrame(animate);
+    } else {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPlaying]);
+
+  const play = () => setIsPlaying(true);
+  const pause = () => setIsPlaying(false);
+  const stop = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+  const seek = (time: number) => setCurrentTime(Math.max(0, Math.min(ANIMATION_CONFIG.totalDuration, time)));
+
+  return { currentTime, isPlaying, play, pause, stop, seek };
+};
+
+// Custom hook for character animation timing
+export const useCharacterTiming = (blockId: string, currentTime: number) => {
+  const block = ANIMATION_CONFIG.contentBlocks.find(b => b.id === blockId);
+  if (!block) return { isActive: false, progress: 0, charDelay: 0 };
+
+  const isActive = currentTime >= block.startTime && currentTime <= block.startTime + block.duration;
+  const adjustedTime = Math.max(0, currentTime - block.startTime);
+  const progress = Math.min(1, adjustedTime / block.duration);
+
+  return {
+    isActive,
+    progress,
+    charDelay: block.animationConfig.charFadeDelay,
+    maskDelay: block.animationConfig.maskFadeDelay,
+    maskDuration: block.animationConfig.maskFadeDuration,
+    staggerDelay: block.animationConfig.staggerDelay || 0,
+    curve: block.animationConfig.curve
+  };
+};
+
+// Custom hook for staggered animation timing
+export const useStaggerTiming = (blockId: string, itemCount: number, currentTime: number) => {
+  const timing = useCharacterTiming(blockId, currentTime);
+  
+  const getItemVisibility = (index: number) => {
+    if (!timing.isActive) return false;
+    const itemStartTime = timing.maskDelay + (index * timing.staggerDelay);
+    const adjustedTime = (currentTime - ANIMATION_CONFIG.contentBlocks.find(b => b.id === blockId)?.startTime!) || 0;
+    return adjustedTime >= itemStartTime;
+  };
+
+  return { ...timing, getItemVisibility };
+};`;
+    }
+
     return `import { useState, useEffect, useRef } from 'react';
 
 // Custom hook for character-by-character text animation
@@ -268,6 +454,86 @@ export const useTimelineAnimation = (duration: number = 10000) => {
   };
 
   const generateConfig = () => {
+    if (animationOnly) {
+      return `// Pure Animation Configuration & Timing Data
+export const ANIMATION_CONFIG = ${JSON.stringify(generateAnimationData(), null, 2)};
+
+// Animation timing utilities
+export const AnimationUtils = {
+  // Calculate character reveal timing
+  getCharacterRevealTime: (charIndex: number, config: any) => {
+    return charIndex * config.charFadeDelay;
+  },
+
+  // Calculate stagger timing for list items
+  getStaggerTime: (itemIndex: number, config: any) => {
+    return config.maskFadeDelay + (itemIndex * (config.staggerDelay || 100));
+  },
+
+  // Check if animation block is active at given time
+  isBlockActive: (blockId: string, currentTime: number) => {
+    const block = ANIMATION_CONFIG.contentBlocks.find(b => b.id === blockId);
+    if (!block) return false;
+    return currentTime >= block.startTime && currentTime <= block.startTime + block.duration;
+  },
+
+  // Get animation progress for a block (0-1)
+  getBlockProgress: (blockId: string, currentTime: number) => {
+    const block = ANIMATION_CONFIG.contentBlocks.find(b => b.id === blockId);
+    if (!block) return 0;
+    const adjustedTime = Math.max(0, currentTime - block.startTime);
+    return Math.min(1, adjustedTime / block.duration);
+  }
+};
+
+// CSS timing functions referenced in animations
+export const TIMING_FUNCTIONS = {
+  easeOut: 'cubic-bezier(0.45,0,0.58,1)',
+  ease: 'cubic-bezier(0.25,0.46,0.45,0.94)',
+  easeIn: 'cubic-bezier(0.55,0.05,0.68,0.19)',
+  backOut: 'cubic-bezier(0.68,-0.55,0.265,1.55)',
+  easeOutExpo: 'cubic-bezier(0.00,0.00,0.00,1.00)',
+  linear: 'linear'
+};
+
+// Animation-specific CSS classes
+export const ANIMATION_STYLES = \`
+.char-fade {
+  opacity: 0;
+  display: inline-block;
+  transition-property: opacity;
+  transition-duration: 320ms;
+  transition-timing-function: var(--curve, cubic-bezier(0.45,0,0.58,1));
+}
+
+.char-fade.visible {
+  opacity: 1;
+}
+
+.stagger-item {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 100ms linear, transform 400ms var(--curve, cubic-bezier(0.00,0.00,0.00,1.00));
+}
+
+.stagger-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mask-reveal {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 100ms linear, transform 400ms var(--curve, cubic-bezier(0.00,0.00,0.00,1.00));
+}
+
+.mask-reveal.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+\`;`;
+    }
+
     return `// Animation configuration
 export const animationConfig = ${JSON.stringify({ contentBlocks, globalConfig }, null, 2)};
 
@@ -356,13 +622,14 @@ export const timingFunctions = {
   };
 
   const getFilename = () => {
+    const prefix = animationOnly ? 'animation-' : '';
     switch (selectedFormat) {
       case 'component':
-        return 'AnimatedTextStudio.tsx';
+        return `${prefix}component.tsx`;
       case 'hooks':
-        return 'animationHooks.ts';
+        return `${prefix}hooks.ts`;
       case 'config':
-        return 'animationConfig.ts';
+        return `${prefix}config.ts`;
       default:
         return 'export.txt';
     }
@@ -380,13 +647,36 @@ export const timingFunctions = {
         </Button>
       </div>
 
+      {/* Animation Only Toggle */}
+      <div className="px-4 py-3 border-b bg-gray-50">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="animation-only"
+            checked={animationOnly}
+            onCheckedChange={setAnimationOnly}
+          />
+          <Label htmlFor="animation-only" className="text-sm font-medium">
+            Animation data only
+          </Label>
+        </div>
+        <p className="text-xs text-gray-600 mt-1">
+          Export only the timing and animation configuration without UI components
+        </p>
+      </div>
+
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         <Tabs value={selectedFormat} onValueChange={(value) => setSelectedFormat(value as any)} className="h-full flex flex-col">
           <TabsList className="mx-4 mt-4">
-            <TabsTrigger value="component">Full Component</TabsTrigger>
-            <TabsTrigger value="hooks">Custom Hooks</TabsTrigger>
-            <TabsTrigger value="config">Config & CSS</TabsTrigger>
+            <TabsTrigger value="component">
+              {animationOnly ? 'Animation Controller' : 'Full Component'}
+            </TabsTrigger>
+            <TabsTrigger value="hooks">
+              {animationOnly ? 'Timing Hooks' : 'Custom Hooks'}
+            </TabsTrigger>
+            <TabsTrigger value="config">
+              {animationOnly ? 'Pure Config' : 'Config & CSS'}
+            </TabsTrigger>
           </TabsList>
 
           <div className="flex-1 p-4 overflow-hidden">
@@ -394,9 +684,9 @@ export const timingFunctions = {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center justify-between">
                   <span>
-                    {selectedFormat === 'component' && 'React Component'}
-                    {selectedFormat === 'hooks' && 'Custom Hooks'}
-                    {selectedFormat === 'config' && 'Configuration & Styles'}
+                    {selectedFormat === 'component' && (animationOnly ? 'Animation Controller' : 'React Component')}
+                    {selectedFormat === 'hooks' && (animationOnly ? 'Animation Timing Hooks' : 'Custom Hooks')}
+                    {selectedFormat === 'config' && (animationOnly ? 'Animation Configuration' : 'Configuration & Styles')}
                   </span>
                   <div className="flex gap-2">
                     <Button
