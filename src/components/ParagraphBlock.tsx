@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import type { ContentBlock } from '@/pages/Index';
 
@@ -8,6 +7,7 @@ interface ParagraphBlockProps {
   currentTime: number;
   isActive: boolean;
   hasStarted: boolean;
+  duration?: number; // Add duration prop
 }
 
 export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
@@ -15,7 +15,8 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   animationConfig,
   currentTime,
   isActive,
-  hasStarted
+  hasStarted,
+  duration = 3000 // Default duration
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [chars, setChars] = useState<Array<{
@@ -94,13 +95,13 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setWords(updatedWords);
 
     } else if (animationType === 'gleam') {
-      // Gleam animation - text appears first, then gleam effect
+      // Gleam animation - text appears first, then gleam effect spans the entire duration
       setTextVisible(currentTime >= 0);
-      const gleamStartTime = 300; // Start gleam after 300ms
-      const gleamDuration = 1500; // Increased duration for slower gleam
+      const gleamStartTime = 0;
+      const gleamDuration = duration; // Use the block's duration
       setGleamVisible(currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration);
     }
-  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length]);
+  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length, duration]);
 
   const renderCharacterAnimation = () => (
     <>
@@ -152,6 +153,9 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
         className={`transition-opacity duration-500 ${gleamVisible ? 'gleam-text' : ''} ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{
+          '--gleam-duration': `${duration}ms`
+        } as React.CSSProperties}
       >
         {content}
       </span>
@@ -170,7 +174,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            animation: gleam-sweep 1500ms ease-out;
+            animation: gleam-sweep var(--gleam-duration, 3000ms) ease-out;
           }
           @keyframes gleam-sweep {
             0% {
