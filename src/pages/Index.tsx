@@ -193,8 +193,15 @@ const Index = () => {
       id: Date.now().toString(),
       type,
       content: type === 'paragraph' 
-        ? 'New paragraph content...' 
-        : { title: 'New List', items: [{ bold: 'Item', desc: 'Description' }] },
+        ? 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.' 
+        : {
+            title: 'Bullet List',
+            items: [
+              { bold: 'Lorem Ipsum', desc: 'Dolor sit amet consectetur adipiscing elit sed.' },
+              { bold: 'Vestibulum Consequat', desc: 'Mauris in aliquam sem fringilla ut morbi tincidunt augue interdum.' },
+              { bold: 'Pellentesque Habitant', desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'  }
+            ]
+          },
       startTime: Math.max(...contentBlocks.map(b => b.startTime + b.duration), 0),
       duration: 3000,
       animationConfig: { ...globalConfig }
