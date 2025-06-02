@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { BulletListEditor } from '@/components/BulletListEditor';
 import type { AnimationConfig, ContentBlock } from '@/pages/Index';
 
 interface AnimationControlPanelProps {
@@ -68,6 +69,11 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
         // Invalid JSON, don't update
       }
     }
+  };
+
+  const handleBulletListContentChange = (content: { title: string; items: Array<{ bold: string; desc: string }> }) => {
+    if (!selectedBlock || selectedBlock.type !== 'bulletList') return;
+    onBlockUpdate(selectedBlock.id, { content });
   };
 
   const handleGlobalCurveChange = (value: string) => {
@@ -206,21 +212,22 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
           <CardContent className="space-y-4">
             <div>
               <Label className="text-xs">Content</Label>
-              <Textarea
-                value={
-                  selectedBlock.type === 'paragraph' 
-                    ? selectedBlock.content as string
-                    : JSON.stringify(selectedBlock.content, null, 2)
-                }
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="mt-2"
-                rows={selectedBlock.type === 'paragraph' ? 4 : 8}
-                placeholder={
-                  selectedBlock.type === 'paragraph' 
-                    ? 'Enter paragraph text...'
-                    : 'Enter JSON for bullet list...'
-                }
-              />
+              {selectedBlock.type === 'paragraph' ? (
+                <Textarea
+                  value={selectedBlock.content as string}
+                  onChange={(e) => handleContentChange(e.target.value)}
+                  className="mt-2"
+                  rows={4}
+                  placeholder="Enter paragraph text..."
+                />
+              ) : (
+                <div className="mt-2">
+                  <BulletListEditor
+                    content={selectedBlock.content as { title: string; items: Array<{ bold: string; desc: string }> }}
+                    onChange={handleBulletListContentChange}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
