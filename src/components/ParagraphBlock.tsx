@@ -149,29 +149,34 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   const renderGleamAnimation = () => (
     <div className="relative">
       <span 
-        className={`transition-opacity duration-500 ${
+        className={`transition-opacity duration-500 ${gleamVisible ? 'gleam-text' : ''} ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {content}
       </span>
-      {gleamVisible && (
-        <div 
-          className="absolute inset-0 pointer-events-none overflow-hidden gleam-effect"
-        />
-      )}
       <style dangerouslySetInnerHTML={{
         __html: `
-          .gleam-effect {
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+          .gleam-text {
+            background: linear-gradient(90deg, 
+              #374151 0%, 
+              #374151 25%, 
+              #f59e0b 50%, 
+              #374151 75%, 
+              #374151 100%
+            );
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             animation: gleam-sweep 800ms ease-out;
           }
           @keyframes gleam-sweep {
             0% {
-              transform: translateX(-100%);
+              background-position: -200% 0%;
             }
             100% {
-              transform: translateX(100%);
+              background-position: 200% 0%;
             }
           }
         `
