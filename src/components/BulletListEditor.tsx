@@ -20,10 +20,17 @@ export const BulletListEditor: React.FC<BulletListEditorProps> = ({
   content,
   onChange
 }) => {
-  const [localContent, setLocalContent] = useState<BulletListContent>(content);
+  // Initialize with a safe default structure
+  const [localContent, setLocalContent] = useState<BulletListContent>({
+    title: content?.title || '',
+    items: content?.items || []
+  });
 
   useEffect(() => {
-    setLocalContent(content);
+    // Only update if content is valid
+    if (content && content.items && Array.isArray(content.items)) {
+      setLocalContent(content);
+    }
   }, [content]);
 
   // Safety check to ensure content has the expected structure
@@ -31,6 +38,15 @@ export const BulletListEditor: React.FC<BulletListEditorProps> = ({
     return (
       <div className="p-4 text-center text-gray-500">
         Invalid bullet list content structure
+      </div>
+    );
+  }
+
+  // Additional safety check for localContent
+  if (!localContent.items || !Array.isArray(localContent.items)) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        Loading...
       </div>
     );
   }
