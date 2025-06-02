@@ -6,7 +6,6 @@ import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/ui/button';
 import { FileCode, Plus, BarChart3 } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-
 export interface ContentBlock {
   id: string;
   type: 'paragraph' | 'bulletList' | 'chart';
@@ -41,7 +40,6 @@ export interface ContentBlock {
     textAnimationType?: 'character' | 'word' | 'gleam';
   };
 }
-
 export interface AnimationConfig {
   globalSpeed: number;
   curve: string;
@@ -50,7 +48,6 @@ export interface AnimationConfig {
   maskFadeDuration: number;
   staggerDelay: number;
 }
-
 const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -98,7 +95,8 @@ const Index = () => {
   }]);
   const [globalConfig, setGlobalConfig] = useState<AnimationConfig>({
     globalSpeed: 1,
-    curve: 'cubic-bezier(0,0,0,1)', // Changed default to cubic-bezier(0,0,0,1)
+    curve: 'cubic-bezier(0,0,0,1)',
+    // Changed default to cubic-bezier(0,0,0,1)
     charFadeDelay: 4,
     maskFadeDelay: 100,
     maskFadeDuration: 200,
@@ -228,7 +226,6 @@ const Index = () => {
   };
   const handleAddBlock = (type: 'paragraph' | 'bulletList' | 'chart') => {
     let newContent;
-    
     if (type === 'paragraph') {
       newContent = 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.';
     } else if (type === 'bulletList') {
@@ -253,20 +250,8 @@ const Index = () => {
           datasets: [{
             label: 'Sales Data',
             data: [12, 19, 3, 5, 2],
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 205, 86, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 205, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)'
-            ],
+            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 205, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 205, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)'],
             borderWidth: 1
           }]
         },
@@ -274,7 +259,7 @@ const Index = () => {
           responsive: true,
           plugins: {
             legend: {
-              position: 'top' as const,
+              position: 'top' as const
             },
             title: {
               display: true,
@@ -284,7 +269,6 @@ const Index = () => {
         }
       };
     }
-
     const newBlock: ContentBlock = {
       id: Date.now().toString(),
       type,
@@ -305,7 +289,7 @@ const Index = () => {
       {/* Header */}
       <header className="h-16 border-b bg-white flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold">Streaming Studio</h1>
+          <h1 className="text-xl font-semibold">Streaming Lab</h1>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => handleAddBlock('paragraph')}>
               <Plus className="w-4 h-4 mr-2" />
