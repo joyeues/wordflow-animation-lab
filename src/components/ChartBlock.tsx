@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Chart as ChartJS,
@@ -52,7 +51,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   const [shouldRender, setShouldRender] = useState(false);
   const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-  // Only show chart when it becomes active
+  // Show chart when it becomes active and keep it visible once started
   useEffect(() => {
     if (isActive && !shouldRender) {
       setShouldRender(true);
@@ -60,11 +59,12 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
       setTimeout(() => {
         setTriggerAnimation(true);
       }, 100);
-    } else if (!isActive && shouldRender) {
-      setShouldRender(false);
-      setTriggerAnimation(false);
     }
-  }, [isActive, shouldRender]);
+    // Keep chart visible once it has started, even when no longer active
+    if (hasStarted && !shouldRender) {
+      setShouldRender(true);
+    }
+  }, [isActive, hasStarted, shouldRender]);
 
   // Trigger chart animation when needed
   useEffect(() => {
