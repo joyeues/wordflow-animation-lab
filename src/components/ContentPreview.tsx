@@ -100,13 +100,13 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                 </div>
                 
                 {/* Block info overlay */}
-                <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 left-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity">
                   {block.type} • {block.startTime}ms - {block.startTime + block.duration}ms • {speedMultiplier.toFixed(1)}x speed
                 </div>
 
-                {/* Delete flyout */}
+                {/* Delete button - moved to upper right */}
                 {isSelected && (
-                  <div className="absolute top-2 left-2 z-10">
+                  <div className="absolute top-2 right-2 z-10">
                     <Button
                       variant="destructive"
                       size="sm"
