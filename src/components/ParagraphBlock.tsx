@@ -96,7 +96,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       // Gleam animation - text appears first, then gleam effect
       setTextVisible(currentTime >= 0);
       const gleamStartTime = 300; // Start gleam after 300ms
-      const gleamDuration = 800; // Gleam effect duration
+      const gleamDuration = 1500; // Increased duration for slower gleam
       setGleamVisible(currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration);
     }
   }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length]);
@@ -169,7 +169,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            animation: gleam-sweep 800ms ease-out;
+            animation: gleam-sweep 1500ms ease-out;
           }
           @keyframes gleam-sweep {
             0% {
