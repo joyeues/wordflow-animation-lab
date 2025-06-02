@@ -159,13 +159,13 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
           .gleam-text {
             background: linear-gradient(90deg, 
               #374151 0%, 
-              #374151 25%, 
-              #7dd3fc 45%, 
-              #a78bfa 55%, 
-              #374151 75%, 
+              #374151 20%, 
+              #7dd3fc 40%, 
+              #a78bfa 60%, 
+              #374151 80%, 
               #374151 100%
             );
-            background-size: 200% 100%;
+            background-size: 300% 100%;
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
@@ -173,10 +173,10 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
           }
           @keyframes gleam-sweep {
             0% {
-              background-position: -200% 0%;
+              background-position: -300% 0%;
             }
             100% {
-              background-position: 200% 0%;
+              background-position: 300% 0%;
             }
           }
         `
