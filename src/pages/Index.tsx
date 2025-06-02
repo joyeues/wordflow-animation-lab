@@ -6,11 +6,16 @@ import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/ui/button';
 import { FileCode, Plus } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-
 export interface ContentBlock {
   id: string;
   type: 'paragraph' | 'bulletList';
-  content: string | { title: string; items: Array<{ bold: string; desc: string }> };
+  content: string | {
+    title: string;
+    items: Array<{
+      bold: string;
+      desc: string;
+    }>;
+  };
   startTime: number;
   duration: number;
   animationConfig: {
@@ -21,7 +26,6 @@ export interface ContentBlock {
     curve: string;
   };
 }
-
 export interface AnimationConfig {
   globalSpeed: number;
   curve: string;
@@ -30,7 +34,6 @@ export interface AnimationConfig {
   maskFadeDuration: number;
   staggerDelay: number;
 }
-
 const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -38,44 +41,44 @@ const Index = () => {
   const [showExportPanel, setShowExportPanel] = useState(false);
   const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([]);
   const [isLooping, setIsLooping] = useState(true);
-  
-  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
-    {
-      id: '1',
-      type: 'paragraph',
-      content: 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.',
-      startTime: 200,
-      duration: 3000,
-      animationConfig: {
-        charFadeDelay: 4,
-        maskFadeDelay: 100,
-        maskFadeDuration: 200,
-        curve: 'cubic-bezier(0.45,0,0.58,1)'
-      }
-    },
-    {
-      id: '2',
-      type: 'bulletList',
-      content: {
-        title: 'Bullet List',
-        items: [
-          { bold: 'Lorem Ipsum', desc: 'Dolor sit amet consectetur adipiscing elit sed.' },
-          { bold: 'Vestibulum Consequat', desc: 'Mauris in aliquam sem fringilla ut morbi tincidunt augue interdum.' },
-          { bold: 'Pellentesque Habitant', desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'  }
-        ]
-      },
-      startTime: 4000,
-      duration: 4000,
-      animationConfig: {
-        charFadeDelay: 0,
-        maskFadeDelay: 200,
-        maskFadeDuration: 400,
-        staggerDelay: 100,
-        curve: 'cubic-bezier(0.00,0.00,0.00,1.00)'
-      }
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([{
+    id: '1',
+    type: 'paragraph',
+    content: 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.',
+    startTime: 200,
+    duration: 3000,
+    animationConfig: {
+      charFadeDelay: 4,
+      maskFadeDelay: 100,
+      maskFadeDuration: 200,
+      curve: 'cubic-bezier(0.45,0,0.58,1)'
     }
-  ]);
-
+  }, {
+    id: '2',
+    type: 'bulletList',
+    content: {
+      title: 'Bullet List',
+      items: [{
+        bold: 'Lorem Ipsum',
+        desc: 'Dolor sit amet consectetur adipiscing elit sed.'
+      }, {
+        bold: 'Vestibulum Consequat',
+        desc: 'Mauris in aliquam sem fringilla ut morbi tincidunt augue interdum.'
+      }, {
+        bold: 'Pellentesque Habitant',
+        desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'
+      }]
+    },
+    startTime: 4000,
+    duration: 4000,
+    animationConfig: {
+      charFadeDelay: 0,
+      maskFadeDelay: 200,
+      maskFadeDuration: 400,
+      staggerDelay: 100,
+      curve: 'cubic-bezier(0.00,0.00,0.00,1.00)'
+    }
+  }]);
   const [globalConfig, setGlobalConfig] = useState<AnimationConfig>({
     globalSpeed: 1,
     curve: 'cubic-bezier(0.45,0,0.58,1)',
@@ -84,30 +87,23 @@ const Index = () => {
     maskFadeDuration: 200,
     staggerDelay: 100
   });
-
   const animationRef = useRef<number>();
 
   // Add keyboard event listener for spacebar
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle spacebar if not typing in an input/textarea
-      if (e.code === 'Space' && 
-          e.target instanceof HTMLElement && 
-          !['INPUT', 'TEXTAREA'].includes(e.target.tagName) &&
-          !e.target.isContentEditable) {
+      if (e.code === 'Space' && e.target instanceof HTMLElement && !['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.isContentEditable) {
         e.preventDefault();
         setIsPlaying(prev => !prev);
       }
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-
   useEffect(() => {
     if (isPlaying) {
-      const startTime = Date.now() - (currentTime / globalConfig.globalSpeed);
-      
+      const startTime = Date.now() - currentTime / globalConfig.globalSpeed;
       const animate = () => {
         const elapsed = (Date.now() - startTime) * globalConfig.globalSpeed;
         if (elapsed >= totalDuration) {
@@ -161,53 +157,43 @@ const Index = () => {
           animationRef.current = requestAnimationFrame(animate);
         }
       };
-      
       animationRef.current = requestAnimationFrame(animate);
     } else {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     }
-
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
   }, [isPlaying, totalDuration, globalConfig.globalSpeed, isLooping]);
-
   const handlePlay = () => {
     setIsPlaying(!isPlaying);
   };
-
   const handleStop = () => {
     setIsPlaying(false);
     setCurrentTime(0);
   };
-
   const handleTimelineSeek = (time: number) => {
     setCurrentTime(time);
   };
-
   const handleBlockUpdate = (blockId: string, updates: Partial<ContentBlock>) => {
-    setContentBlocks(blocks => 
-      blocks.map(block => 
-        block.id === blockId ? { ...block, ...updates } : block
-      )
-    );
+    setContentBlocks(blocks => blocks.map(block => block.id === blockId ? {
+      ...block,
+      ...updates
+    } : block));
   };
-
   const handleBlockDelete = (blockId: string) => {
     setContentBlocks(blocks => blocks.filter(block => block.id !== blockId));
     setSelectedBlockIds(ids => ids.filter(id => id !== blockId));
   };
-
   const handleBlockSelect = (blockId: string | null, isShiftClick: boolean = false) => {
     if (blockId === null) {
       setSelectedBlockIds([]);
       return;
     }
-
     if (isShiftClick) {
       setSelectedBlockIds(prev => {
         if (prev.includes(blockId)) {
@@ -223,53 +209,45 @@ const Index = () => {
       setSelectedBlockIds([blockId]);
     }
   };
-
   const handleAddBlock = (type: 'paragraph' | 'bulletList') => {
     const newBlock: ContentBlock = {
       id: Date.now().toString(),
       type,
-      content: type === 'paragraph' 
-        ? 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.' 
-        : {
-            title: 'Bullet List',
-            items: [
-              { bold: 'Lorem Ipsum', desc: 'Dolor sit amet consectetur adipiscing elit sed.' },
-              { bold: 'Vestibulum Consequat', desc: 'Mauris in aliquam sem fringilla ut morbi tincidunt augue interdum.' },
-              { bold: 'Pellentesque Habitant', desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'  }
-            ]
-          },
+      content: type === 'paragraph' ? 'Lorem ipsum dolor sit amet consectetur. Vitae pharetra sem feugiat viverra quis id. Vel sit id at et ullamcorper neque enim. Est sit lacus quisque faucibus nec elementum sed lobortis.' : {
+        title: 'Bullet List',
+        items: [{
+          bold: 'Lorem Ipsum',
+          desc: 'Dolor sit amet consectetur adipiscing elit sed.'
+        }, {
+          bold: 'Vestibulum Consequat',
+          desc: 'Mauris in aliquam sem fringilla ut morbi tincidunt augue interdum.'
+        }, {
+          bold: 'Pellentesque Habitant',
+          desc: 'Morbi tristique senectus et netus et malesuada fames ac turpis egestas.'
+        }]
+      },
       startTime: Math.max(...contentBlocks.map(b => b.startTime + b.duration), 0),
       duration: 3000,
-      animationConfig: { ...globalConfig }
+      animationConfig: {
+        ...globalConfig
+      }
     };
     setContentBlocks([...contentBlocks, newBlock]);
   };
 
   // Get the first selected block for the control panel
-  const selectedBlock = selectedBlockIds.length > 0 
-    ? contentBlocks.find(b => b.id === selectedBlockIds[0]) 
-    : null;
-
-  return (
-    <div className="h-screen flex flex-col bg-gray-50">
+  const selectedBlock = selectedBlockIds.length > 0 ? contentBlocks.find(b => b.id === selectedBlockIds[0]) : null;
+  return <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="h-16 border-b bg-white flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold">AI Animation Studio</h1>
+          <h1 className="text-xl font-semibold">Streaming Studio</h1>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleAddBlock('paragraph')}
-            >
+            <Button variant="outline" size="sm" onClick={() => handleAddBlock('paragraph')}>
               <Plus className="w-4 h-4 mr-2" />
               Paragraph
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleAddBlock('bulletList')}
-            >
+            <Button variant="outline" size="sm" onClick={() => handleAddBlock('bulletList')}>
               <Plus className="w-4 h-4 mr-2" />
               Bullet List
             </Button>
@@ -277,11 +255,7 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowExportPanel(!showExportPanel)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowExportPanel(!showExportPanel)}>
             <FileCode className="w-4 h-4 mr-2" />
             Export
           </Button>
@@ -294,33 +268,15 @@ const Index = () => {
           <div className="h-full flex">
             {/* Control Panel */}
             <div className="w-80 border-r bg-white">
-              <AnimationControlPanel
-                globalConfig={globalConfig}
-                onGlobalConfigChange={setGlobalConfig}
-                selectedBlock={selectedBlock}
-                onBlockUpdate={handleBlockUpdate}
-              />
+              <AnimationControlPanel globalConfig={globalConfig} onGlobalConfigChange={setGlobalConfig} selectedBlock={selectedBlock} onBlockUpdate={handleBlockUpdate} />
             </div>
 
             {/* Preview Area */}
             <div className="flex-1 relative">
-              <ContentPreview
-                contentBlocks={contentBlocks}
-                currentTime={currentTime}
-                globalConfig={globalConfig}
-                onBlockSelect={handleBlockSelect}
-                selectedBlockIds={selectedBlockIds}
-                onBlockDelete={handleBlockDelete}
-              />
+              <ContentPreview contentBlocks={contentBlocks} currentTime={currentTime} globalConfig={globalConfig} onBlockSelect={handleBlockSelect} selectedBlockIds={selectedBlockIds} onBlockDelete={handleBlockDelete} />
 
               {/* Export Panel */}
-              <ExportPanel
-                isOpen={showExportPanel}
-                onClose={() => setShowExportPanel(false)}
-                contentBlocks={contentBlocks}
-                globalConfig={globalConfig}
-                selectedBlockId={selectedBlockIds[0] || null}
-              />
+              <ExportPanel isOpen={showExportPanel} onClose={() => setShowExportPanel(false)} contentBlocks={contentBlocks} globalConfig={globalConfig} selectedBlockId={selectedBlockIds[0] || null} />
             </div>
           </div>
         </ResizablePanel>
@@ -328,25 +284,9 @@ const Index = () => {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={25} minSize={15} maxSize={50}>
-          <Timeline
-            contentBlocks={contentBlocks}
-            currentTime={currentTime}
-            totalDuration={totalDuration}
-            onSeek={handleTimelineSeek}
-            onBlockUpdate={handleBlockUpdate}
-            selectedBlockId={selectedBlockIds[0] || null}
-            onBlockSelect={(blockId) => handleBlockSelect(blockId)}
-            onBlockDelete={handleBlockDelete}
-            isPlaying={isPlaying}
-            onPlay={handlePlay}
-            onStop={handleStop}
-            isLooping={isLooping}
-            onLoopToggle={setIsLooping}
-          />
+          <Timeline contentBlocks={contentBlocks} currentTime={currentTime} totalDuration={totalDuration} onSeek={handleTimelineSeek} onBlockUpdate={handleBlockUpdate} selectedBlockId={selectedBlockIds[0] || null} onBlockSelect={blockId => handleBlockSelect(blockId)} onBlockDelete={handleBlockDelete} isPlaying={isPlaying} onPlay={handlePlay} onStop={handleStop} isLooping={isLooping} onLoopToggle={setIsLooping} />
         </ResizablePanel>
       </ResizablePanelGroup>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
