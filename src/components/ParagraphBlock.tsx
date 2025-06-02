@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import type { ContentBlock } from '@/pages/Index';
 
@@ -22,101 +23,174 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
     isSpace: boolean;
     visible: boolean;
   }>>([]);
-  const [bottomFadeVisible, setBottomFadeVisible] = useState(true);
+  const [words, setWords] = useState<Array<{
+    word: string;
+    visible: boolean;
+  }>>([]);
+  const [gleamVisible, setGleamVisible] = useState(false);
+  const [textVisible, setTextVisible] = useState(false);
   const prevContentRef = useRef<string>('');
 
-  // Initialize or reinitialize characters when content changes
+  const animationType = animationConfig.textAnimationType || 'character';
+
+  // Initialize characters and words when content changes
   useEffect(() => {
+    // Character array for character animation
     const charArray = content.split('').map(char => ({
       char,
       isSpace: char === ' ',
       visible: false
     }));
     setChars(charArray);
+
+    // Word array for word streaming animation
+    const wordArray = content.split(' ').map(word => ({
+      word,
+      visible: false
+    }));
+    setWords(wordArray);
+
     prevContentRef.current = content;
   }, [content]);
 
   // Handle animation state updates
   useEffect(() => {
     if (!hasStarted) {
-      // Reset animation state
-      setChars(prev => prev.map(char => ({
-        ...char,
-        visible: false
-      })));
-      setBottomFadeVisible(true);
+      // Reset all animation states
+      setChars(prev => prev.map(char => ({ ...char, visible: false })));
+      setWords(prev => prev.map(word => ({ ...word, visible: false })));
+      setTextVisible(false);
+      setGleamVisible(false);
       return;
     }
 
-    if (chars.length === 0) return;
+    if (animationType === 'character') {
+      // Character-by-character animation (existing)
+      if (chars.length === 0) return;
 
-    // When content changes during animation, immediately recalculate visibility
-    const contentChanged = prevContentRef.current !== content;
-    if (contentChanged) {
-      prevContentRef.current = content;
+      const nonSpaceChars = chars.filter(char => !char.isSpace);
+      const updatedChars = chars.map((char, index) => {
+        if (char.isSpace) return char;
+        const nonSpaceIndex = chars.slice(0, index).filter(c => !c.isSpace).length;
+        const charStartTime = nonSpaceIndex * animationConfig.charFadeDelay;
+        return {
+          ...char,
+          visible: currentTime >= charStartTime
+        };
+      });
+      setChars(updatedChars);
+
+    } else if (animationType === 'word') {
+      // Word streaming animation
+      if (words.length === 0) return;
+
+      const updatedWords = words.map((word, index) => {
+        const wordStartTime = index * (animationConfig.charFadeDelay * 3); // Slower than character animation
+        return {
+          ...word,
+          visible: currentTime >= wordStartTime
+        };
+      });
+      setWords(updatedWords);
+
+    } else if (animationType === 'gleam') {
+      // Gleam animation - text appears first, then gleam effect
+      setTextVisible(currentTime >= 0);
+      const gleamStartTime = 300; // Start gleam after 300ms
+      const gleamDuration = 800; // Gleam effect duration
+      setGleamVisible(currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration);
     }
+  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length]);
 
-    const nonSpaceChars = chars.filter(char => !char.isSpace);
-    const totalChars = nonSpaceChars.length;
+  const renderCharacterAnimation = () => (
+    <>
+      {chars.map((char, index) => 
+        char.isSpace ? (
+          <span key={`${content}-${index}`}> </span>
+        ) : (
+          <span 
+            key={`${content}-${index}`}
+            className={`inline-block transition-opacity duration-300 ${animationConfig.curve} ${
+              char.visible ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              transitionTimingFunction: animationConfig.curve,
+              transitionDuration: '320ms'
+            }}
+          >
+            {char.char}
+          </span>
+        )
+      )}
+    </>
+  );
 
-    // Character fade in animation - recalculate based on current time
-    const updatedChars = chars.map((char, index) => {
-      if (char.isSpace) return char;
-      const nonSpaceIndex = chars.slice(0, index).filter(c => !c.isSpace).length;
-      const charStartTime = nonSpaceIndex * animationConfig.charFadeDelay;
-      return {
-        ...char,
-        visible: currentTime >= charStartTime
-      };
-    });
-    
-    setChars(updatedChars);
+  const renderWordAnimation = () => (
+    <>
+      {words.map((word, index) => (
+        <span key={`${content}-word-${index}`}>
+          <span 
+            className={`inline-block transition-all duration-400 ${animationConfig.curve} ${
+              word.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+            style={{
+              transitionTimingFunction: animationConfig.curve,
+              transitionDuration: '400ms'
+            }}
+          >
+            {word.word}
+          </span>
+          {index < words.length - 1 && ' '}
+        </span>
+      ))}
+    </>
+  );
 
-    // Bottom fade animation - hide when last character starts to fade in
-    const lastCharTime = (totalChars - 1) * animationConfig.charFadeDelay;
-    setBottomFadeVisible(currentTime < lastCharTime);
-  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay]);
+  const renderGleamAnimation = () => (
+    <div className="relative">
+      <span 
+        className={`transition-opacity duration-500 ${
+          textVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        {content}
+      </span>
+      {gleamVisible && (
+        <div 
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
+            animation: 'gleam-sweep 800ms ease-out'
+          }}
+        />
+      )}
+      <style jsx>{`
+        @keyframes gleam-sweep {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
+    </div>
+  );
 
   return (
-    <div className="relative p-6 max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer px-0 my-0 py-0 rounded-xl">
+    <div className="relative max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer rounded-xl">
       <div 
         ref={containerRef} 
         style={{
           wordWrap: 'break-word',
           whiteSpace: 'normal'
         }} 
-        className="relative text-gray-600 text-base leading-6 mx-[23px] py-0 my-0"
+        className="relative text-gray-600 text-base leading-6 mx-[23px]"
       >
-        {chars.map((char, index) => 
-          char.isSpace ? (
-            <span key={`${content}-${index}`}> </span>
-          ) : (
-            <span 
-              key={`${content}-${index}`}
-              className={`inline-block transition-opacity duration-300 ${animationConfig.curve} ${
-                char.visible ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{
-                transitionTimingFunction: animationConfig.curve,
-                transitionDuration: '320ms'
-              }}
-            >
-              {char.char}
-            </span>
-          )
-        )}
+        {animationType === 'character' && renderCharacterAnimation()}
+        {animationType === 'word' && renderWordAnimation()}
+        {animationType === 'gleam' && renderGleamAnimation()}
       </div>
-      
-      {/* Bottom fade - now completely transparent */}
-      <div 
-        className={`absolute left-0 right-0 bottom-0 h-11 pointer-events-none transition-opacity duration-600 ${animationConfig.curve} rounded-b-xl ${
-          bottomFadeVisible ? 'opacity-100' : 'opacity-0'
-        }`} 
-        style={{
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 65%, rgba(255,255,255,0) 100%)',
-          transitionTimingFunction: animationConfig.curve
-        }} 
-      />
     </div>
   );
 };

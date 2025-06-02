@@ -190,6 +190,26 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
             {/* Animation Settings - only for non-chart blocks */}
             {selectedBlock.type !== 'chart' && (
               <>
+                {/* Text Animation Type - only for paragraph blocks */}
+                {selectedBlock.type === 'paragraph' && (
+                  <div>
+                    <Label>Text Animation Type</Label>
+                    <Select 
+                      value={selectedBlock.animationConfig.textAnimationType || 'character'} 
+                      onValueChange={(value) => handleAnimationConfigChange('textAnimationType', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="character">Character by Character</SelectItem>
+                        <SelectItem value="word">Word Streaming</SelectItem>
+                        <SelectItem value="gleam">Fade in with Gleam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div>
                   <Label>Easing Curve</Label>
                   <Select 
