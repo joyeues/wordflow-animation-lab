@@ -44,13 +44,16 @@ export const Timeline: React.FC<TimelineProps> = ({
 
   const pixelsPerMs = (timelineRef.current?.clientWidth || 800) / totalDuration;
 
+  // Helper function to snap to nearest 10ms
+  const snapToTen = (value: number) => Math.round(value / 10) * 10;
+
   const handleTimelineClick = (e: React.MouseEvent) => {
     if (!timelineRef.current || isDragging) return;
     
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const time = (x / rect.width) * totalDuration;
-    onSeek(Math.max(0, Math.min(totalDuration, time)));
+    onSeek(Math.max(0, Math.min(totalDuration, snapToTen(time))));
   };
 
   const handleTimelineMouseDown = (e: React.MouseEvent) => {
@@ -69,7 +72,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const time = (x / rect.width) * totalDuration;
-    onSeek(Math.max(0, Math.min(totalDuration, time)));
+    onSeek(Math.max(0, Math.min(totalDuration, snapToTen(time))));
   };
 
   const handleBlockMouseDown = (e: React.MouseEvent, blockId: string, type: 'move' | 'resize-start' | 'resize-end') => {
@@ -101,7 +104,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     const time = (x / rect.width) * totalDuration;
 
     if (isScrubbing && !isDragging) {
-      onSeek(Math.max(0, Math.min(totalDuration, time)));
+      onSeek(Math.max(0, Math.min(totalDuration, snapToTen(time))));
       return;
     }
 
@@ -115,14 +118,14 @@ export const Timeline: React.FC<TimelineProps> = ({
       if (dragType === 'move') {
         const adjustedTime = time - (dragOffset / rect.width) * totalDuration;
         const newStartTime = Math.max(0, Math.min(totalDuration - block.duration, adjustedTime));
-        onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime) });
+        onBlockUpdate(draggedBlock, { startTime: snapToTen(newStartTime) });
       } else if (dragType === 'resize-start') {
         const newStartTime = Math.max(0, Math.min(block.startTime + block.duration - 100, time));
         const newDuration = block.duration + (block.startTime - newStartTime);
-        onBlockUpdate(draggedBlock, { startTime: Math.round(newStartTime), duration: Math.round(newDuration) });
+        onBlockUpdate(draggedBlock, { startTime: snapToTen(newStartTime), duration: snapToTen(newDuration) });
       } else if (dragType === 'resize-end') {
         const newDuration = Math.max(100, time - block.startTime);
-        onBlockUpdate(draggedBlock, { duration: Math.round(newDuration) });
+        onBlockUpdate(draggedBlock, { duration: snapToTen(newDuration) });
       }
     });
   };
