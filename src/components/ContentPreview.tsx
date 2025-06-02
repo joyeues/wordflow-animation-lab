@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ParagraphBlock } from './ParagraphBlock';
 import { BulletListBlock } from './BulletListBlock';
@@ -72,7 +73,6 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
               {block.type === 'paragraph' && (
                 <ParagraphBlock
                   content={block.content as string}
-                  isVisible={isVisible}
                   currentTime={currentTime - block.startTime}
                   animationConfig={block.animationConfig}
                   globalConfig={globalConfig}
@@ -84,7 +84,6 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
               {block.type === 'bulletList' && (
                 <BulletListBlock
                   content={block.content as { title: string; items: Array<{ bold: string; desc: string }> }}
-                  isVisible={isVisible}
                   currentTime={currentTime - block.startTime}
                   animationConfig={block.animationConfig}
                   globalConfig={globalConfig}
