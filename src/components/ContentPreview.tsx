@@ -75,7 +75,6 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                   content={block.content as string}
                   currentTime={currentTime - block.startTime}
                   animationConfig={block.animationConfig}
-                  globalConfig={globalConfig}
                   isActive={isActive}
                   hasStarted={hasStarted}
                 />
@@ -86,7 +85,6 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                   content={block.content as { title: string; items: Array<{ bold: string; desc: string }> }}
                   currentTime={currentTime - block.startTime}
                   animationConfig={block.animationConfig}
-                  globalConfig={globalConfig}
                   isActive={isActive}
                   hasStarted={hasStarted}
                 />
