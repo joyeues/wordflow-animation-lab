@@ -98,7 +98,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
       options: {
         ...options,
         animation: {
-          duration: duration, // Use the block's duration for animation
+          duration: 400, // Fixed 400ms animation duration
           easing: 'easeOutSine',
           animateRotate: true,
           animateScale: true
