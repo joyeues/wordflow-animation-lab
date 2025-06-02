@@ -128,7 +128,10 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                         options?: any;
                       }}
                       isVisible={isActive}
-                      className="transition-opacity duration-500"
+                      currentTime={adjustedCurrentTime}
+                      isActive={isActive}
+                      hasStarted={hasStarted}
+                      className="transition-all duration-500"
                     />
                   )}
                 </div>
