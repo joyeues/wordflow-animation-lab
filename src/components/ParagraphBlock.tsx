@@ -28,7 +28,6 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   }>>([]);
   const [gleamVisible, setGleamVisible] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
-  const [gleamComplete, setGleamComplete] = useState(false);
   const prevContentRef = useRef<string>('');
 
   const animationType = animationConfig.textAnimationType || 'character';
@@ -61,7 +60,6 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setWords(prev => prev.map(word => ({ ...word, visible: false })));
       setTextVisible(false);
       setGleamVisible(false);
-      setGleamComplete(false);
       return;
     }
 
@@ -95,20 +93,13 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setWords(updatedWords);
 
     } else if (animationType === 'gleam') {
-      // Gleam animation - text is revealed by the gleam effect
-      const gleamStartTime = 0;
-      const gleamDuration = 1200; // Gleam effect duration
-      
-      if (currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration && !gleamComplete) {
-        setGleamVisible(true);
-        setTextVisible(true);
-      } else if (currentTime > gleamStartTime + gleamDuration) {
-        setGleamVisible(false);
-        setTextVisible(true);
-        setGleamComplete(true);
-      }
+      // Gleam animation - text appears first, then gleam effect
+      setTextVisible(currentTime >= 0);
+      const gleamStartTime = 300; // Start gleam after 300ms
+      const gleamDuration = 800; // Gleam effect duration
+      setGleamVisible(currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration);
     }
-  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length, gleamComplete]);
+  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length]);
 
   const renderCharacterAnimation = () => (
     <>
@@ -157,7 +148,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   const renderGleamAnimation = () => (
     <div className="relative">
       <span 
-        className={`gleam-container ${
+        className={`transition-opacity duration-500 ${gleamVisible ? 'gleam-text' : ''} ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -165,42 +156,27 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       </span>
       <style dangerouslySetInnerHTML={{
         __html: `
-          .gleam-container {
-            position: relative;
-            color: #374151;
-            transition: opacity 0.3s ease;
-          }
-          
-          .gleam-container::before {
-            content: "${content.replace(/"/g, '\\"')}";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+          .gleam-text {
             background: linear-gradient(90deg, 
-              transparent 0%,
-              transparent 30%,
-              #7dd3fc 45%,
-              #a78bfa 55%,
-              transparent 70%,
-              transparent 100%
+              #374151 0%, 
+              #374151 25%, 
+              #7dd3fc 45%, 
+              #a78bfa 55%, 
+              #374151 75%, 
+              #374151 100%
             );
             background-size: 200% 100%;
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            animation: ${gleamVisible && !gleamComplete ? 'gleam-reveal 1200ms ease-out forwards' : 'none'};
-            opacity: ${gleamVisible ? '1' : '0'};
+            animation: gleam-sweep 800ms ease-out;
           }
-          
-          @keyframes gleam-reveal {
+          @keyframes gleam-sweep {
             0% {
               background-position: -200% 0%;
-              opacity: 1;
             }
             100% {
               background-position: 200% 0%;
-              opacity: 1;
             }
           }
         `
