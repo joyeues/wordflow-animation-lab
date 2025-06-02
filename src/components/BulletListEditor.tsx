@@ -26,6 +26,15 @@ export const BulletListEditor: React.FC<BulletListEditorProps> = ({
     setLocalContent(content);
   }, [content]);
 
+  // Safety check to ensure content has the expected structure
+  if (!content || !content.items || !Array.isArray(content.items)) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        Invalid bullet list content structure
+      </div>
+    );
+  }
+
   const handleTitleChange = (title: string) => {
     const updated = { ...localContent, title };
     setLocalContent(updated);
