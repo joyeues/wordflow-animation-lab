@@ -24,17 +24,20 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
     visible: boolean;
   }>>([]);
   const [bottomFadeVisible, setBottomFadeVisible] = useState(true);
+  const prevContentRef = useRef<string>('');
 
+  // Initialize or reinitialize characters when content changes
   useEffect(() => {
-    // Initialize characters
     const charArray = content.split('').map(char => ({
       char,
       isSpace: char === ' ',
       visible: false
     }));
     setChars(charArray);
+    prevContentRef.current = content;
   }, [content]);
 
+  // Handle animation state updates
   useEffect(() => {
     if (!hasStarted) {
       // Reset animation state
@@ -48,11 +51,16 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
 
     if (chars.length === 0) return;
 
-    // For blocks that start immediately (startTime: 0), we need to trigger animation right away
+    // When content changes during animation, immediately recalculate visibility
+    const contentChanged = prevContentRef.current !== content;
+    if (contentChanged) {
+      prevContentRef.current = content;
+    }
+
     const nonSpaceChars = chars.filter(char => !char.isSpace);
     const totalChars = nonSpaceChars.length;
 
-    // Character fade in animation
+    // Character fade in animation - recalculate based on current time
     const updatedChars = chars.map((char, index) => {
       if (char.isSpace) return char;
       const nonSpaceIndex = chars.slice(0, index).filter(c => !c.isSpace).length;
@@ -62,12 +70,13 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
         visible: currentTime >= charStartTime
       };
     });
+    
     setChars(updatedChars);
 
     // Bottom fade animation - hide when last character starts to fade in
     const lastCharTime = (totalChars - 1) * animationConfig.charFadeDelay;
     setBottomFadeVisible(currentTime < lastCharTime);
-  }, [currentTime, hasStarted, chars.length, animationConfig.charFadeDelay, content]);
+  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay]);
 
   return (
     <div className="relative p-6 max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer px-0 my-0 py-0 rounded-xl">
@@ -81,10 +90,10 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       >
         {chars.map((char, index) => 
           char.isSpace ? (
-            <span key={index}> </span>
+            <span key={`${content}-${index}`}> </span>
           ) : (
             <span 
-              key={index} 
+              key={`${content}-${index}`}
               className={`inline-block transition-opacity duration-300 ${animationConfig.curve} ${
                 char.visible ? 'opacity-100' : 'opacity-0'
               }`}
