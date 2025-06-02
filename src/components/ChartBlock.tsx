@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Chart as ChartJS,
@@ -30,6 +31,7 @@ interface ChartBlockProps {
     chartType: 'bar' | 'line' | 'pie' | 'doughnut';
     data: any;
     options?: any;
+    duration: number; // Add duration to content for animation timing
   };
   isVisible: boolean;
   currentTime: number;
@@ -46,7 +48,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   hasStarted,
   className 
 }) => {
-  const { chartType, data, options } = content;
+  const { chartType, data, options, duration } = content;
   const chartRef = useRef<any>(null);
   const [shouldRender, setShouldRender] = useState(false);
   const [triggerAnimation, setTriggerAnimation] = useState(false);
@@ -94,7 +96,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
       options: {
         ...options,
         animation: {
-          duration: 1000,
+          duration: duration, // Use the block's duration for animation
           easing: 'easeOutSine',
           animateRotate: true,
           animateScale: true
