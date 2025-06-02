@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimationControlPanel } from '@/components/AnimationControlPanel';
 import { ContentPreview } from '@/components/ContentPreview';
@@ -278,6 +277,7 @@ const Index = () => {
                 onClose={() => setShowExportPanel(false)}
                 contentBlocks={contentBlocks}
                 globalConfig={globalConfig}
+                selectedBlockId={selectedBlockId}
               />
             </div>
           </div>

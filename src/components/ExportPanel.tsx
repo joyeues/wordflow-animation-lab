@@ -14,19 +14,31 @@ interface ExportPanelProps {
   onClose: () => void;
   contentBlocks: ContentBlock[];
   globalConfig: AnimationConfig;
+  selectedBlockId?: string | null;
 }
 
 export const ExportPanel: React.FC<ExportPanelProps> = ({
   isOpen,
   onClose,
   contentBlocks,
-  globalConfig
+  globalConfig,
+  selectedBlockId
 }) => {
   const [selectedFormat, setSelectedFormat] = useState<'react' | 'vue' | 'angular' | 'svelte' | 'vanilla' | 'framer' | 'gsap' | 'github'>('react');
   const [animationOnly, setAnimationOnly] = useState(false);
 
+  // Filter content blocks based on selection
+  const getFilteredContentBlocks = () => {
+    if (selectedBlockId) {
+      const selectedBlock = contentBlocks.find(block => block.id === selectedBlockId);
+      return selectedBlock ? [selectedBlock] : [];
+    }
+    return contentBlocks;
+  };
+
   const generateAnimationData = () => {
-    const animationBlocks = contentBlocks.map(block => ({
+    const filteredBlocks = getFilteredContentBlocks();
+    const animationBlocks = filteredBlocks.map(block => ({
       id: block.id,
       type: block.type,
       startTime: block.startTime,
@@ -37,13 +49,15 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
     return {
       globalConfig,
       contentBlocks: animationBlocks,
-      totalDuration: Math.max(...contentBlocks.map(b => b.startTime + b.duration), 0)
+      totalDuration: Math.max(...filteredBlocks.map(b => b.startTime + b.duration), 0)
     };
   };
 
   const generateReactComponent = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `// Animation-only React Component
+      return `// Animation-only React Component${selectedBlockId ? ' (Single Block)' : ''}
 import React, { useState, useEffect } from 'react';
 
 const AnimationController = () => {
@@ -123,12 +137,12 @@ export default AnimationController;`;
 
     return `import React, { useState, useEffect } from 'react';
 
-// Animated text component
+// Animated text component${selectedBlockId ? ' (Single Block)' : ''}
 const AnimatedTextStudio = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const contentBlocks = ${JSON.stringify(contentBlocks, null, 2)};
+  const contentBlocks = ${JSON.stringify(filteredBlocks, null, 2)};
   const globalConfig = ${JSON.stringify(globalConfig, null, 2)};
 
   useEffect(() => {
@@ -141,7 +155,7 @@ const AnimatedTextStudio = () => {
         const elapsed = Date.now() - startTime;
         setCurrentTime(elapsed);
         
-        if (elapsed < 10000) { // 10 second duration
+        if (elapsed < ${Math.max(...filteredBlocks.map(b => b.startTime + b.duration), 10000)}) {
           animationFrame = requestAnimationFrame(animate);
         } else {
           setIsPlaying(false);
@@ -263,8 +277,10 @@ export default AnimatedTextStudio;`;
   };
 
   const generateVueComponent = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `<!-- Vue 3 Animation Controller -->
+      return `<!-- Vue 3 Animation Controller${selectedBlockId ? ' (Single Block)' : ''} -->
 <template>
   <div class="animation-controller">
     <div class="controls mb-4">
@@ -349,7 +365,7 @@ onUnmounted(() => {
 </script>`;
     }
 
-    return `<!-- Vue 3 Animated Text Component -->
+    return `<!-- Vue 3 Animated Text Component${selectedBlockId ? ' (Single Block)' : ''} -->
 <template>
   <div class="min-h-screen bg-gray-50 p-8">
     <div class="max-w-2xl mx-auto space-y-8">
@@ -387,7 +403,7 @@ const isPlaying = ref(false)
 const currentTime = ref(0)
 let animationFrame: number | null = null
 
-const contentBlocks = ${JSON.stringify(contentBlocks, null, 2)}
+const contentBlocks = ${JSON.stringify(filteredBlocks, null, 2)}
 const globalConfig = ${JSON.stringify(globalConfig, null, 2)}
 
 // Component logic here...
@@ -395,8 +411,10 @@ const globalConfig = ${JSON.stringify(globalConfig, null, 2)}
   };
 
   const generateAngularComponent = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `// Angular Animation Controller
+      return `// Angular Animation Controller${selectedBlockId ? ' (Single Block)' : ''}
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 interface AnimationBlock {
@@ -494,7 +512,7 @@ export class AnimationControllerComponent implements OnInit, OnDestroy {
 }`;
     }
 
-    return `// Angular Animated Text Component
+    return `// Angular Animated Text Component${selectedBlockId ? ' (Single Block)' : ''}
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component({
@@ -517,13 +535,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   \`
 })
 export class AnimatedTextComponent implements OnInit, OnDestroy {
-  // Component implementation
+  // Component implementation with filtered blocks: ${JSON.stringify(filteredBlocks.map(b => b.id), null, 2)}
 }`;
   };
 
   const generateSvelteComponent = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `<!-- Svelte Animation Controller -->
+      return `<!-- Svelte Animation Controller${selectedBlockId ? ' (Single Block)' : ''} -->
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   
@@ -606,9 +626,9 @@ export class AnimatedTextComponent implements OnInit, OnDestroy {
 </div>`;
     }
 
-    return `<!-- Svelte Animated Text Component -->
+    return `<!-- Svelte Animated Text Component${selectedBlockId ? ' (Single Block)' : ''} -->
 <script lang="ts">
-  // Full Svelte component implementation
+  // Full Svelte component implementation with filtered blocks: ${JSON.stringify(filteredBlocks.map(b => b.id), null, 2)}
 </script>
 
 <div class="min-h-screen bg-gray-50 p-8">
@@ -617,8 +637,10 @@ export class AnimatedTextComponent implements OnInit, OnDestroy {
   };
 
   const generateVanillaJS = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `// Vanilla JavaScript Animation Controller
+      return `// Vanilla JavaScript Animation Controller${selectedBlockId ? ' (Single Block)' : ''}
 class AnimationController {
   constructor(container) {
     this.container = container;
@@ -635,79 +657,88 @@ class AnimationController {
   init() {
     this.container.innerHTML = \`
       <div class="animation-controller">
-        <div class="controls mb-4">
-          <button id="playBtn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Play
-          </button>
-          <span id="timeDisplay" class="ml-4">Time: 0ms</span>
+        <div class="controls">
+          <button id="playBtn">Play</button>
+          <button id="pauseBtn">Pause</button>
+          <button id="restartBtn">Restart</button>
+          <div id="progress">Progress: 0%</div>
         </div>
-        <div id="activeAnimations" class="active-animations"></div>
+        <div id="content"></div>
       </div>
     \`;
 
     this.playBtn = this.container.querySelector('#playBtn');
-    this.timeDisplay = this.container.querySelector('#timeDisplay');
-    this.activeAnimations = this.container.querySelector('#activeAnimations');
+    this.pauseBtn = this.container.querySelector('#pauseBtn');
+    this.restartBtn = this.container.querySelector('#restartBtn');
+    this.progress = this.container.querySelector('#progress');
+    this.content = this.container.querySelector('#content');
 
-    this.playBtn.addEventListener('click', () => this.togglePlay());
+    this.playBtn.addEventListener('click', () => this.play());
+    this.pauseBtn.addEventListener('click', () => this.pause());
+    this.restartBtn.addEventListener('click', () => this.restart());
   }
 
-  togglePlay() {
-    this.isPlaying = !this.isPlaying;
-    this.playBtn.textContent = this.isPlaying ? 'Pause' : 'Play';
-    
-    if (this.isPlaying) {
-      this.startAnimation();
-    } else {
-      this.stopAnimation();
-    }
-  }
-
-  getActiveBlocks() {
-    return this.animationData.contentBlocks.filter(block => 
-      this.currentTime >= block.startTime && 
-      this.currentTime <= block.startTime + block.duration
-    );
-  }
-
-  getBlockProgress(block) {
-    const adjustedTime = Math.max(0, this.currentTime - block.startTime);
-    return Math.min(1, adjustedTime / block.duration);
-  }
-
-  startAnimation() {
-    const startTime = Date.now() - this.currentTime;
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      this.currentTime = elapsed;
-      this.timeDisplay.textContent = \`Time: \${Math.round(elapsed)}ms\`;
+  setupTimeline() {
+    // Create timeline based on animation data
+    this.animationData.contentBlocks.forEach(block => {
+      const startTime = block.startTime / 1000; // Convert to seconds
       
-      // Update active blocks display
-      const activeBlocks = this.getActiveBlocks();
-      this.activeAnimations.innerHTML = activeBlocks.map(block => \`
-        <div class="animation-block mb-2 p-2 border rounded">
-          <div>Block ID: \${block.id}</div>
-          <div>Type: \${block.type}</div>
-          <div>Progress: \${Math.round(this.getBlockProgress(block) * 100)}%</div>
-        </div>
-      \`).join('');
-      
-      if (elapsed < this.animationData.totalDuration) {
-        this.animationFrame = requestAnimationFrame(animate);
-      } else {
-        this.isPlaying = false;
-        this.playBtn.textContent = 'Play';
+      if (block.type === 'paragraph') {
+        // Character-by-character animation
+        const chars = block.content.split('').map((char, i) => {
+          const element = document.createElement('span');
+          element.textContent = char === ' ' ? ' ' : char;
+          element.style.opacity = '0';
+          return element;
+        });
+        
+        this.timeline.to(chars, {
+          opacity: 1,
+          duration: 0.32,
+          stagger: block.animationConfig.charFadeDelay / 1000,
+          ease: "power2.out"
+        }, startTime);
+        
+      } else if (block.type === 'bulletList') {
+        // Staggered list animation
+        const items = block.content.items.map((item, i) => {
+          const element = document.createElement('div');
+          element.innerHTML = \`<strong>\${item.bold}</strong> – \${item.desc}\`;
+          element.style.opacity = '0';
+          element.style.transform = 'translateY(40px)';
+          return element;
+        });
+        
+        this.timeline.to(items, {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          stagger: block.animationConfig.staggerDelay / 1000,
+          ease: "expo.out"
+        }, startTime + (block.animationConfig.maskFadeDelay / 1000));
       }
-    };
-    
-    this.animationFrame = requestAnimationFrame(animate);
+    });
+
+    // Update progress
+    this.timeline.eventCallback("onUpdate", () => {
+      const progress = (this.timeline.progress() * 100).toFixed(1);
+      this.progress.textContent = \`Progress: \${progress}%\`;
+    });
   }
 
-  stopAnimation() {
-    if (this.animationFrame) {
-      cancelAnimationFrame(this.animationFrame);
-    }
+  play() {
+    this.timeline.play();
+    this.isPlaying = true;
+  }
+
+  pause() {
+    this.timeline.pause();
+    this.isPlaying = false;
+  }
+
+  restart() {
+    this.timeline.restart();
+    this.isPlaying = true;
   }
 }
 
@@ -715,18 +746,21 @@ class AnimationController {
 // const controller = new AnimationController(document.getElementById('app'));`;
     }
 
-    return `// Vanilla JavaScript Animated Text
+    return `// Vanilla JavaScript Animated Text${selectedBlockId ? ' (Single Block)' : ''}
 class AnimatedTextStudio {
   constructor(container) {
     this.container = container;
+    this.contentBlocks = ${JSON.stringify(filteredBlocks, null, 2)};
     // Implementation here
   }
 }`;
   };
 
   const generateFramerMotion = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `// Framer Motion Animation Configuration
+      return `// Framer Motion Animation Configuration${selectedBlockId ? ' (Single Block)' : ''}
 import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -824,14 +858,16 @@ export const FramerAnimationController = () => {
 };`;
     }
 
-    return `// Framer Motion Complete Component
+    return `// Framer Motion Complete Component${selectedBlockId ? ' (Single Block)' : ''}
 import { motion } from 'framer-motion';
-// Full implementation with Framer Motion animations`;
+// Full implementation with Framer Motion animations for blocks: ${JSON.stringify(filteredBlocks.map(b => b.id), null, 2)}`;
   };
 
   const generateGSAP = () => {
+    const filteredBlocks = getFilteredContentBlocks();
+    
     if (animationOnly) {
-      return `// GSAP Animation Controller
+      return `// GSAP Animation Controller${selectedBlockId ? ' (Single Block)' : ''}
 import { gsap } from 'gsap';
 
 class GSAPAnimationController {
@@ -940,13 +976,16 @@ class GSAPAnimationController {
 // const controller = new GSAPAnimationController(document.getElementById('app'));`;
     }
 
-    return `// GSAP Complete Animation Setup
+    return `// GSAP Complete Animation Setup${selectedBlockId ? ' (Single Block)' : ''}
 import { gsap } from 'gsap';
-// Full GSAP implementation`;
+// Full GSAP implementation for blocks: ${JSON.stringify(filteredBlocks.map(b => b.id), null, 2)}`;
   };
 
   const generateGitHubFiles = () => {
-    const readmeContent = `# Animated Text Studio Export
+    const filteredBlocks = getFilteredContentBlocks();
+    const blockText = selectedBlockId ? ` (Single Block: ${filteredBlocks[0]?.type || 'Unknown'} (ID: ${selectedBlockId}))` : '';
+    
+    const readmeContent = `# Animated Text Studio Export${blockText}
 
 This project contains animation timing data and components exported from Animated Text Studio.
 
@@ -954,7 +993,7 @@ This project contains animation timing data and components exported from Animate
 
 The following animation blocks were exported:
 
-${contentBlocks.map(block => `
+${filteredBlocks.map(block => `
 ### Block ${block.id} (${block.type})
 - **Start Time:** ${block.startTime}ms
 - **Duration:** ${block.duration}ms
@@ -997,9 +1036,9 @@ import animationData from './animation-data.json';
 `;
 
     const packageJson = `{
-  "name": "animated-text-studio-export",
+  "name": "animated-text-studio-export${selectedBlockId ? '-single-block' : ''}",
   "version": "1.0.0",
-  "description": "Animation timing data exported from Animated Text Studio",
+  "description": "Animation timing data exported from Animated Text Studio${blockText}",
   "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
@@ -1029,7 +1068,7 @@ import animationData from './animation-data.json';
   "license": "MIT"
 }`;
 
-    return `# GitHub Repository Files
+    return `# GitHub Repository Files${blockText}
 
 ## README.md
 \`\`\`markdown
@@ -1409,7 +1448,8 @@ export const timingFunctions = {
   const handleGitHubExport = () => {
     const repoContent = generateGitHubFiles();
     const timestamp = new Date().toISOString().split('T')[0];
-    handleDownload(repoContent, `github-repository-${timestamp}.md`);
+    const suffix = selectedBlockId ? `-block-${selectedBlockId}` : '';
+    handleDownload(repoContent, `github-repository${suffix}-${timestamp}.md`);
   };
 
   const getContent = () => {
@@ -1437,23 +1477,24 @@ export const timingFunctions = {
 
   const getFilename = () => {
     const prefix = animationOnly ? 'animation-' : '';
+    const suffix = selectedBlockId ? `-block-${selectedBlockId}` : '';
     switch (selectedFormat) {
       case 'react':
-        return `${prefix}component.tsx`;
+        return `${prefix}component${suffix}.tsx`;
       case 'vue':
-        return `${prefix}component.vue`;
+        return `${prefix}component${suffix}.vue`;
       case 'angular':
-        return `${prefix}component.ts`;
+        return `${prefix}component${suffix}.ts`;
       case 'svelte':
-        return `${prefix}component.svelte`;
+        return `${prefix}component${suffix}.svelte`;
       case 'vanilla':
-        return `${prefix}script.js`;
+        return `${prefix}script${suffix}.js`;
       case 'framer':
-        return `${prefix}framer-motion.tsx`;
+        return `${prefix}framer-motion${suffix}.tsx`;
       case 'gsap':
-        return `${prefix}gsap.js`;
+        return `${prefix}gsap${suffix}.js`;
       case 'github':
-        return `repository-files.md`;
+        return `repository-files${suffix}.md`;
       default:
         return 'export.txt';
     }
@@ -1461,11 +1502,19 @@ export const timingFunctions = {
 
   if (!isOpen) return null;
 
+  const filteredBlocks = getFilteredContentBlocks();
+  const exportDescription = selectedBlockId 
+    ? `Exporting single block: ${filteredBlocks[0]?.type || 'Unknown'} (ID: ${selectedBlockId})`
+    : `Exporting all blocks (${contentBlocks.length} total)`;
+
   return (
     <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-white border-l shadow-lg z-10 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold">Export Animation</h2>
+        <div>
+          <h2 className="text-lg font-semibold">Export Animation</h2>
+          <p className="text-sm text-gray-600">{exportDescription}</p>
+        </div>
         <Button variant="ghost" size="sm" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>
@@ -1521,6 +1570,7 @@ export const timingFunctions = {
                     {selectedFormat === 'framer' && (animationOnly ? 'Framer Motion Configuration' : 'Framer Motion Component')}
                     {selectedFormat === 'gsap' && (animationOnly ? 'GSAP Animation Controller' : 'GSAP Component')}
                     {selectedFormat === 'github' && 'GitHub Repository Files'}
+                    {selectedBlockId && ` (Single Block)`}
                   </span>
                   <div className="flex gap-2">
                     {selectedFormat === 'github' ? (
