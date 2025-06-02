@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import type { ContentBlock } from '@/pages/Index';
 
@@ -86,7 +85,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
           wordWrap: 'break-word',
           whiteSpace: 'normal'
         }} 
-        className="relative min-h-[110px] text-gray-600 text-base leading-6 mx-[23px] py-0 my-0"
+        className="relative text-gray-600 text-base leading-6 mx-[23px] py-0 my-0"
       >
         {chars.map((char, index) => 
           char.isSpace ? (
