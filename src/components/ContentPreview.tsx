@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ParagraphBlock } from './ParagraphBlock';
 import { BulletListBlock } from './BulletListBlock';
@@ -92,14 +91,12 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
 
               {block.type === 'chart' && (
                 <ChartBlock
-                  content={{
-                    ...(block.content as any),
-                    duration: block.duration // Pass the block's duration to the chart
-                  }}
+                  content={block.content as any}
                   isVisible={isVisible}
                   currentTime={currentTime - block.startTime}
                   isActive={isActive}
                   hasStarted={hasStarted}
+                  duration={block.duration}
                 />
               )}
             </div>

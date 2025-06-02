@@ -31,13 +31,14 @@ interface ChartBlockProps {
     chartType: 'bar' | 'line' | 'pie' | 'doughnut';
     data: any;
     options?: any;
-    duration: number; // Add duration to content for animation timing
+    duration?: number; // Make duration optional in content
   };
   isVisible: boolean;
   currentTime: number;
   isActive: boolean;
   hasStarted: boolean;
   className?: string;
+  duration: number; // Add duration as a direct prop from the block
 }
 
 export const ChartBlock: React.FC<ChartBlockProps> = ({ 
@@ -46,9 +47,10 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   currentTime,
   isActive,
   hasStarted,
-  className 
+  className,
+  duration // Use the block's duration directly
 }) => {
-  const { chartType, data, options, duration } = content;
+  const { chartType, data, options } = content;
   const chartRef = useRef<any>(null);
   const [shouldRender, setShouldRender] = useState(false);
   const [triggerAnimation, setTriggerAnimation] = useState(false);
