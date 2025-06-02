@@ -28,7 +28,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
     word: string;
     visible: boolean;
   }>>([]);
-  const [gleamVisible, setGleamVisible] = useState(false);
+  const [gleamTriggered, setGleamTriggered] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
   const prevContentRef = useRef<string>('');
 
@@ -61,7 +61,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setChars(prev => prev.map(char => ({ ...char, visible: false })));
       setWords(prev => prev.map(word => ({ ...word, visible: false })));
       setTextVisible(false);
-      setGleamVisible(false);
+      setGleamTriggered(false);
       return;
     }
 
@@ -95,13 +95,13 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
       setWords(updatedWords);
 
     } else if (animationType === 'gleam') {
-      // Gleam animation - text appears first, then gleam effect spans the entire duration
+      // Gleam animation - text appears first, then gleam effect triggers once
       setTextVisible(currentTime >= 0);
-      const gleamStartTime = 0;
-      const gleamDuration = duration; // Use the block's duration
-      setGleamVisible(currentTime >= gleamStartTime && currentTime <= gleamStartTime + gleamDuration);
+      if (currentTime >= 0 && !gleamTriggered) {
+        setGleamTriggered(true);
+      }
     }
-  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length, duration]);
+  }, [currentTime, hasStarted, content, animationConfig.charFadeDelay, animationType, chars.length, words.length, duration, gleamTriggered]);
 
   const renderCharacterAnimation = () => (
     <>
@@ -150,7 +150,7 @@ export const ParagraphBlock: React.FC<ParagraphBlockProps> = ({
   const renderGleamAnimation = () => (
     <div className="relative">
       <span 
-        className={`transition-opacity duration-500 ${gleamVisible ? 'gleam-text' : ''} ${
+        className={`transition-opacity duration-500 ${gleamTriggered ? 'gleam-text' : ''} ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
         style={{
