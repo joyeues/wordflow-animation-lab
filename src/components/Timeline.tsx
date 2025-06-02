@@ -62,6 +62,9 @@ export const Timeline: React.FC<TimelineProps> = ({
       return; // Let block handling take precedence
     }
     
+    // Deselect any selected blocks when clicking on empty timeline
+    onBlockSelect(null);
+    
     setIsScrubbing(true);
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;

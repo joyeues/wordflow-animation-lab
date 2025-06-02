@@ -44,10 +44,21 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
       }
     }
   }, [currentTime, contentBlocks]);
+
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    // Only deselect if clicking directly on the background, not on child elements
+    if (e.target === e.currentTarget) {
+      onBlockSelect(null);
+    }
+  };
   
   return (
     <div className="h-full bg-gray-100 relative">
-      <div ref={scrollContainerRef} className="h-full overflow-y-auto p-6">
+      <div 
+        ref={scrollContainerRef} 
+        className="h-full overflow-y-auto p-6"
+        onClick={handleBackgroundClick}
+      >
         <div className="max-w-4xl mx-auto space-y-1">
           {contentBlocks.sort((a, b) => a.startTime - b.startTime).map((block, index) => {
             // Calculate speed multiplier based on block duration vs default duration (3000ms)
@@ -63,7 +74,10 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                 key={block.id}
                 id={`block-${block.id}`}
                 className="relative cursor-pointer"
-                onClick={() => onBlockSelect(block.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onBlockSelect(block.id);
+                }}
               >
                 <div className="mx-[115px]">
                   {block.type === 'paragraph' ? (
