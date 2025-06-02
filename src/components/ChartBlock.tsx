@@ -50,21 +50,27 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   const chartRef = useRef<any>(null);
   const [shouldRender, setShouldRender] = useState(false);
   const [triggerAnimation, setTriggerAnimation] = useState(false);
+  const [hasBeenActive, setHasBeenActive] = useState(false);
 
-  // Show chart when it becomes active and keep it visible once started
+  // Show chart when it becomes active and keep it visible once it has been active
   useEffect(() => {
     if (isActive && !shouldRender) {
       setShouldRender(true);
+      setHasBeenActive(true);
       // Trigger animation after a short delay to ensure chart is mounted
       setTimeout(() => {
         setTriggerAnimation(true);
       }, 100);
     }
-    // Keep chart visible once it has started, even when no longer active
-    if (hasStarted && !shouldRender) {
+    // Keep chart visible if it has been active before (even after duration ends)
+    if (hasBeenActive && hasStarted && !shouldRender) {
       setShouldRender(true);
     }
-  }, [isActive, hasStarted, shouldRender]);
+    // Hide chart if it hasn't started yet and hasn't been active
+    if (!hasStarted && !hasBeenActive && shouldRender) {
+      setShouldRender(false);
+    }
+  }, [isActive, hasStarted, shouldRender, hasBeenActive]);
 
   // Trigger chart animation when needed
   useEffect(() => {
