@@ -47,6 +47,18 @@ export const Timeline: React.FC<TimelineProps> = ({
   // Helper function to snap to nearest 10ms
   const snapToTen = (value: number) => Math.round(value / 10) * 10;
 
+  // Helper function to get block display text
+  const getBlockDisplayText = (block: ContentBlock) => {
+    if (typeof block.content === 'string') {
+      return block.content.slice(0, 20);
+    } else if (block.type === 'bulletList' && 'title' in block.content) {
+      return block.content.title;
+    } else if (block.type === 'chart' && 'data' in block.content) {
+      return 'Chart';
+    }
+    return 'Unknown';
+  };
+
   const handleTimelineClick = (e: React.MouseEvent) => {
     if (!timelineRef.current || isDragging) return;
     
@@ -252,12 +264,14 @@ export const Timeline: React.FC<TimelineProps> = ({
                       ? 'ring-2 ring-blue-400 bg-blue-500' 
                       : block.type === 'paragraph' 
                         ? 'bg-green-500 hover:bg-green-400' 
-                        : 'bg-purple-500 hover:bg-purple-400'
+                        : block.type === 'bulletList'
+                          ? 'bg-purple-500 hover:bg-purple-400'
+                          : 'bg-orange-500 hover:bg-orange-400'
                   }`}
                   style={{
                     left: `${left}%`,
                     width: `${width}%`,
-                    top: block.type === 'paragraph' ? '0px' : '16px'
+                    top: block.type === 'paragraph' ? '0px' : block.type === 'bulletList' ? '16px' : '32px'
                   }}
                   onMouseDown={(e) => handleBlockMouseDown(e, block.id, 'move')}
                   onClick={(e) => {
@@ -277,11 +291,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
                   {/* Block content */}
                   <div className="px-2 py-1 text-xs font-medium text-white truncate">
-                    {block.type === 'paragraph' ? 'P' : 'BL'}: {
-                      typeof block.content === 'string' 
-                        ? block.content.slice(0, 20) 
-                        : block.content.title
-                    }...
+                    {block.type === 'paragraph' ? 'P' : block.type === 'bulletList' ? 'BL' : 'CH'}: {getBlockDisplayText(block)}...
                   </div>
                 </div>
               );
