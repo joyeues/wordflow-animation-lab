@@ -10,8 +10,8 @@ interface ContentPreviewProps {
   contentBlocks: ContentBlock[];
   currentTime: number;
   globalConfig: AnimationConfig;
-  onBlockSelect: (blockId: string | null) => void;
-  selectedBlockId: string | null;
+  onBlockSelect: (blockId: string | null, isShiftClick?: boolean) => void;
+  selectedBlockIds: string[];
   onBlockDelete: (blockId: string) => void;
 }
 
@@ -20,7 +20,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
   currentTime,
   globalConfig,
   onBlockSelect,
-  selectedBlockId,
+  selectedBlockIds,
   onBlockDelete
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -51,9 +51,28 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
       onBlockSelect(null);
     }
   };
+
+  const handleDeleteSelected = () => {
+    selectedBlockIds.forEach(id => onBlockDelete(id));
+  };
   
   return (
     <div className="h-full bg-gray-100 relative">
+      {/* Multi-select delete button */}
+      {selectedBlockIds.length > 1 && (
+        <div className="absolute top-4 right-4 z-20">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDeleteSelected}
+            className="shadow-lg"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete {selectedBlockIds.length} blocks
+          </Button>
+        </div>
+      )}
+
       <div 
         ref={scrollContainerRef} 
         className="h-full overflow-y-auto p-6"
@@ -67,16 +86,18 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
             const adjustedCurrentTime = Math.max(0, currentTime - block.startTime) / globalConfig.globalSpeed * speedMultiplier;
             const isActive = currentTime >= block.startTime && currentTime <= block.startTime + block.duration;
             const hasStarted = currentTime >= block.startTime;
-            const isSelected = selectedBlockId === block.id;
+            const isSelected = selectedBlockIds.includes(block.id);
             
             return (
               <div
                 key={block.id}
                 id={`block-${block.id}`}
-                className="relative cursor-pointer"
+                className={`relative cursor-pointer transition-all duration-200 ${
+                  isSelected ? 'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50' : ''
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onBlockSelect(block.id);
+                  onBlockSelect(block.id, e.shiftKey);
                 }}
               >
                 <div className="mx-[115px]">
@@ -104,8 +125,8 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                   {block.type} • {block.startTime}ms - {block.startTime + block.duration}ms • {speedMultiplier.toFixed(1)}x speed
                 </div>
 
-                {/* Delete button - moved to upper right */}
-                {isSelected && (
+                {/* Delete button - only show for single selection */}
+                {isSelected && selectedBlockIds.length === 1 && (
                   <div className="absolute top-2 right-2 z-10">
                     <Button
                       variant="destructive"
@@ -118,6 +139,13 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
+                  </div>
+                )}
+
+                {/* Multi-selection indicator */}
+                {isSelected && selectedBlockIds.length > 1 && (
+                  <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded shadow-lg">
+                    Selected
                   </div>
                 )}
               </div>

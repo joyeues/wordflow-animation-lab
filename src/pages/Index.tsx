@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimationControlPanel } from '@/components/AnimationControlPanel';
 import { ContentPreview } from '@/components/ContentPreview';
@@ -36,7 +37,7 @@ const Index = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(10000); // 10 seconds
   const [showExportPanel, setShowExportPanel] = useState(false);
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([]);
   const [isLooping, setIsLooping] = useState(true);
   
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
@@ -182,8 +183,28 @@ const Index = () => {
 
   const handleBlockDelete = (blockId: string) => {
     setContentBlocks(blocks => blocks.filter(block => block.id !== blockId));
-    if (selectedBlockId === blockId) {
-      setSelectedBlockId(null);
+    setSelectedBlockIds(ids => ids.filter(id => id !== blockId));
+  };
+
+  const handleBlockSelect = (blockId: string | null, isShiftClick: boolean = false) => {
+    if (blockId === null) {
+      setSelectedBlockIds([]);
+      return;
+    }
+
+    if (isShiftClick) {
+      setSelectedBlockIds(prev => {
+        if (prev.includes(blockId)) {
+          // Remove if already selected
+          return prev.filter(id => id !== blockId);
+        } else {
+          // Add to selection
+          return [...prev, blockId];
+        }
+      });
+    } else {
+      // Regular click - single selection
+      setSelectedBlockIds([blockId]);
     }
   };
 
@@ -207,6 +228,11 @@ const Index = () => {
     };
     setContentBlocks([...contentBlocks, newBlock]);
   };
+
+  // Get the first selected block for the control panel
+  const selectedBlock = selectedBlockIds.length > 0 
+    ? contentBlocks.find(b => b.id === selectedBlockIds[0]) 
+    : null;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -255,7 +281,7 @@ const Index = () => {
               <AnimationControlPanel
                 globalConfig={globalConfig}
                 onGlobalConfigChange={setGlobalConfig}
-                selectedBlock={selectedBlockId ? contentBlocks.find(b => b.id === selectedBlockId) : null}
+                selectedBlock={selectedBlock}
                 onBlockUpdate={handleBlockUpdate}
               />
             </div>
@@ -266,8 +292,8 @@ const Index = () => {
                 contentBlocks={contentBlocks}
                 currentTime={currentTime}
                 globalConfig={globalConfig}
-                onBlockSelect={setSelectedBlockId}
-                selectedBlockId={selectedBlockId}
+                onBlockSelect={handleBlockSelect}
+                selectedBlockIds={selectedBlockIds}
                 onBlockDelete={handleBlockDelete}
               />
 
@@ -277,7 +303,7 @@ const Index = () => {
                 onClose={() => setShowExportPanel(false)}
                 contentBlocks={contentBlocks}
                 globalConfig={globalConfig}
-                selectedBlockId={selectedBlockId}
+                selectedBlockId={selectedBlockIds[0] || null}
               />
             </div>
           </div>
@@ -292,8 +318,8 @@ const Index = () => {
             totalDuration={totalDuration}
             onSeek={handleTimelineSeek}
             onBlockUpdate={handleBlockUpdate}
-            selectedBlockId={selectedBlockId}
-            onBlockSelect={setSelectedBlockId}
+            selectedBlockId={selectedBlockIds[0] || null}
+            onBlockSelect={(blockId) => handleBlockSelect(blockId)}
             onBlockDelete={handleBlockDelete}
             isPlaying={isPlaying}
             onPlay={handlePlay}
