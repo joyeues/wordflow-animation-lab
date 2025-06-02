@@ -21,9 +21,10 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
   const [itemsVisible, setItemsVisible] = useState<boolean[]>([]);
 
   useEffect(() => {
-    if (!hasStarted) {
+    // Safety check to ensure content and items exist
+    if (!hasStarted || !content || !content.items) {
       setHeaderVisible(false);
-      setItemsVisible(content.items.map(() => false));
+      setItemsVisible([]);
       return;
     }
 
@@ -40,7 +41,12 @@ export const BulletListBlock: React.FC<BulletListBlockProps> = ({
     });
 
     setItemsVisible(newItemsVisible);
-  }, [currentTime, hasStarted, content.items.length, animationConfig]);
+  }, [currentTime, hasStarted, content, content?.items?.length, animationConfig]);
+
+  // Safety check - don't render if content is invalid
+  if (!content || !content.items) {
+    return null;
+  }
 
   return (
     <div className="rounded-xl overflow-hidden max-w-2xl transition-all duration-200 hover:bg-gray-50 hover:shadow-sm cursor-pointer">

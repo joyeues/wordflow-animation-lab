@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ParagraphBlock } from '@/components/ParagraphBlock';
 import { BulletListBlock } from '@/components/BulletListBlock';
+import { ChartBlock } from '@/components/ChartBlock';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import type { ContentBlock, AnimationConfig } from '@/pages/Index';
@@ -101,7 +102,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                 }}
               >
                 <div className="mx-[115px]">
-                  {block.type === 'paragraph' ? (
+                  {block.type === 'paragraph' && (
                     <ParagraphBlock
                       content={block.content as string}
                       animationConfig={block.animationConfig}
@@ -109,13 +110,25 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
                       isActive={isActive}
                       hasStarted={hasStarted}
                     />
-                  ) : (
+                  )}
+                  {block.type === 'bulletList' && (
                     <BulletListBlock
                       content={block.content as { title: string; items: Array<{ bold: string; desc: string }> }}
                       animationConfig={block.animationConfig}
                       currentTime={adjustedCurrentTime}
                       isActive={isActive}
                       hasStarted={hasStarted}
+                    />
+                  )}
+                  {block.type === 'chart' && (
+                    <ChartBlock
+                      content={block.content as {
+                        chartType: 'bar' | 'line' | 'pie' | 'doughnut';
+                        data: any;
+                        options?: any;
+                      }}
+                      isVisible={isActive}
+                      className="transition-opacity duration-500"
                     />
                   )}
                 </div>
