@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimationControlPanel } from '@/components/AnimationControlPanel';
 import { ContentPreview } from '@/components/ContentPreview';
@@ -87,6 +86,23 @@ const Index = () => {
   });
 
   const animationRef = useRef<number>();
+
+  // Add keyboard event listener for spacebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle spacebar if not typing in an input/textarea
+      if (e.code === 'Space' && 
+          e.target instanceof HTMLElement && 
+          !['INPUT', 'TEXTAREA'].includes(e.target.tagName) &&
+          !e.target.isContentEditable) {
+        e.preventDefault();
+        setIsPlaying(prev => !prev);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (isPlaying) {
