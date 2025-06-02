@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 import { BulletListEditor } from '@/components/BulletListEditor';
-import type { AnimationConfig, ContentBlock } from '@/pages/Index';
+import { ChartEditor } from '@/components/ChartEditor';
+import type { ContentBlock, AnimationConfig } from '@/pages/Index';
 
 interface AnimationControlPanelProps {
   globalConfig: AnimationConfig;
@@ -17,102 +17,52 @@ interface AnimationControlPanelProps {
   onBlockUpdate: (blockId: string, updates: Partial<ContentBlock>) => void;
 }
 
-const easingCurves = [
-  { value: 'cubic-bezier(0.45,0,0.58,1)', label: 'Ease Out' },
-  { value: 'cubic-bezier(0.25,0.46,0.45,0.94)', label: 'Ease' },
-  { value: 'cubic-bezier(0.55,0.05,0.68,0.19)', label: 'Ease In' },
-  { value: 'cubic-bezier(0.68,-0.55,0.265,1.55)', label: 'Back Out' },
-  { value: 'cubic-bezier(0.00,0.00,0.00,1.00)', label: 'Ease Out Expo' },
-  { value: 'linear', label: 'Linear' },
-  { value: 'custom', label: 'Custom' }
-];
-
 export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
   globalConfig,
   onGlobalConfigChange,
   selectedBlock,
   onBlockUpdate
 }) => {
-  const [isGlobalCustom, setIsGlobalCustom] = useState(false);
-  const [isBlockCustom, setIsBlockCustom] = useState(false);
-
   const handleGlobalConfigChange = (key: keyof AnimationConfig, value: any) => {
-    onGlobalConfigChange({ ...globalConfig, [key]: value });
+    onGlobalConfigChange({
+      ...globalConfig,
+      [key]: value
+    });
   };
 
-  const handleBlockConfigChange = (key: string, value: any) => {
-    if (!selectedBlock) return;
-    
-    if (key.startsWith('animationConfig.')) {
-      const configKey = key.split('.')[1];
-      onBlockUpdate(selectedBlock.id, {
-        animationConfig: {
-          ...selectedBlock.animationConfig,
-          [configKey]: value
-        }
-      });
-    } else {
+  const handleBlockContentChange = (content: any) => {
+    if (selectedBlock) {
+      onBlockUpdate(selectedBlock.id, { content });
+    }
+  };
+
+  const handleBlockPropertyChange = (key: keyof ContentBlock, value: any) => {
+    if (selectedBlock) {
       onBlockUpdate(selectedBlock.id, { [key]: value });
     }
   };
 
-  const handleParagraphContentChange = (value: string) => {
-    if (!selectedBlock || selectedBlock.type !== 'paragraph') return;
-    onBlockUpdate(selectedBlock.id, { content: value });
-  };
-
-  const handleBulletListContentChange = (content: { title: string; items: Array<{ bold: string; desc: string }> }) => {
-    if (!selectedBlock || selectedBlock.type !== 'bulletList') return;
-    onBlockUpdate(selectedBlock.id, { content });
-  };
-
-  const handleGlobalCurveChange = (value: string) => {
-    if (value === 'custom') {
-      setIsGlobalCustom(true);
-      return;
+  const handleAnimationConfigChange = (key: string, value: any) => {
+    if (selectedBlock) {
+      onBlockUpdate(selectedBlock.id, {
+        animationConfig: {
+          ...selectedBlock.animationConfig,
+          [key]: value
+        }
+      });
     }
-    setIsGlobalCustom(false);
-    handleGlobalConfigChange('curve', value);
-  };
-
-  const handleGlobalCustomCurveChange = (value: string) => {
-    handleGlobalConfigChange('curve', value);
-  };
-
-  const handleBlockCurveChange = (value: string) => {
-    if (value === 'custom') {
-      setIsBlockCustom(true);
-      return;
-    }
-    setIsBlockCustom(false);
-    handleBlockConfigChange('animationConfig.curve', value);
-  };
-
-  const handleBlockCustomCurveChange = (value: string) => {
-    handleBlockConfigChange('animationConfig.curve', value);
-  };
-
-  const getCurrentGlobalCurveValue = () => {
-    const predefined = easingCurves.find(curve => curve.value === globalConfig.curve && curve.value !== 'custom');
-    return predefined ? globalConfig.curve : 'custom';
-  };
-
-  const getCurrentBlockCurveValue = () => {
-    if (!selectedBlock) return '';
-    const predefined = easingCurves.find(curve => curve.value === selectedBlock.animationConfig.curve && curve.value !== 'custom');
-    return predefined ? selectedBlock.animationConfig.curve : 'custom';
   };
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-6">
-      {/* Global Controls */}
+    <div className="h-full overflow-y-auto p-4 space-y-4">
+      {/* Global Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Global Settings</CardTitle>
+          <CardTitle>Global Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label className="text-xs">Global Speed</Label>
+            <Label>Global Speed</Label>
             <Slider
               value={[globalConfig.globalSpeed]}
               onValueChange={([value]) => handleGlobalConfigChange('globalSpeed', value)}
@@ -121,228 +71,182 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
               step={0.1}
               className="mt-2"
             />
-            <div className="text-xs text-gray-500 mt-1">{globalConfig.globalSpeed}x</div>
+            <div className="text-sm text-gray-500 mt-1">{globalConfig.globalSpeed}x</div>
           </div>
 
           <div>
-            <Label className="text-xs">Default Easing</Label>
-            {isGlobalCustom ? (
-              <div className="mt-2 space-y-2">
-                <Input
-                  placeholder="e.g., cubic-bezier(0.25, 0.1, 0.25, 1) or ease-in-out"
-                  value={globalConfig.curve}
-                  onChange={(e) => handleGlobalCustomCurveChange(e.target.value)}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsGlobalCustom(false)}
-                  className="text-xs"
-                >
-                  Back to presets
-                </Button>
-              </div>
-            ) : (
-              <Select
-                value={getCurrentGlobalCurveValue()}
-                onValueChange={handleGlobalCurveChange}
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {easingCurves.map(curve => (
-                    <SelectItem key={curve.value} value={curve.value}>
-                      {curve.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Label>Easing Curve</Label>
+            <Select value={globalConfig.curve} onValueChange={(value) => handleGlobalConfigChange('curve', value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cubic-bezier(0.45,0,0.58,1)">Ease Out</SelectItem>
+                <SelectItem value="cubic-bezier(0.00,0.00,0.00,1.00)">Ease In</SelectItem>
+                <SelectItem value="cubic-bezier(0.45,0.45,0.55,1)">Ease In Out</SelectItem>
+                <SelectItem value="linear">Linear</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <Label className="text-xs">Character Fade Delay (ms)</Label>
-            <Slider
-              value={[globalConfig.charFadeDelay]}
-              onValueChange={([value]) => handleGlobalConfigChange('charFadeDelay', Math.round(value))}
-              min={1}
-              max={20}
-              step={1}
-              className="mt-2"
+            <Label>Character Fade Delay (ms)</Label>
+            <Input
+              type="number"
+              value={globalConfig.charFadeDelay}
+              onChange={(e) => handleGlobalConfigChange('charFadeDelay', parseInt(e.target.value) || 0)}
             />
-            <div className="text-xs text-gray-500 mt-1">{Math.round(globalConfig.charFadeDelay)}ms</div>
           </div>
 
           <div>
-            <Label className="text-xs">Stagger Delay (ms)</Label>
-            <Slider
-              value={[globalConfig.staggerDelay]}
-              onValueChange={([value]) => handleGlobalConfigChange('staggerDelay', Math.round(value))}
-              min={50}
-              max={500}
-              step={10}
-              className="mt-2"
+            <Label>Mask Fade Delay (ms)</Label>
+            <Input
+              type="number"
+              value={globalConfig.maskFadeDelay}
+              onChange={(e) => handleGlobalConfigChange('maskFadeDelay', parseInt(e.target.value) || 0)}
             />
-            <div className="text-xs text-gray-500 mt-1">{Math.round(globalConfig.staggerDelay)}ms</div>
+          </div>
+
+          <div>
+            <Label>Mask Fade Duration (ms)</Label>
+            <Input
+              type="number"
+              value={globalConfig.maskFadeDuration}
+              onChange={(e) => handleGlobalConfigChange('maskFadeDuration', parseInt(e.target.value) || 0)}
+            />
+          </div>
+
+          <div>
+            <Label>Stagger Delay (ms)</Label>
+            <Input
+              type="number"
+              value={globalConfig.staggerDelay}
+              onChange={(e) => handleGlobalConfigChange('staggerDelay', parseInt(e.target.value) || 0)}
+            />
           </div>
         </CardContent>
       </Card>
 
-      <Separator />
-
-      {/* Block-Specific Controls */}
-      {selectedBlock ? (
+      {/* Block Settings */}
+      {selectedBlock && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              {selectedBlock.type === 'paragraph' ? 'Paragraph' : 'Bullet List'} Settings
+            <CardTitle>
+              {selectedBlock.type === 'paragraph' && 'Paragraph Settings'}
+              {selectedBlock.type === 'bulletList' && 'Bullet List Settings'}
+              {selectedBlock.type === 'chart' && 'Chart Settings'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Content Editor */}
             <div>
-              <Label className="text-xs">Content</Label>
-              {selectedBlock.type === 'paragraph' ? (
+              <Label>Content</Label>
+              {selectedBlock.type === 'paragraph' && (
                 <Textarea
                   value={selectedBlock.content as string}
-                  onChange={(e) => handleParagraphContentChange(e.target.value)}
+                  onChange={(e) => handleBlockContentChange(e.target.value)}
                   className="mt-2"
                   rows={4}
-                  placeholder="Enter paragraph text..."
                 />
-              ) : (
+              )}
+              {selectedBlock.type === 'bulletList' && (
                 <div className="mt-2">
                   <BulletListEditor
                     content={selectedBlock.content as { title: string; items: Array<{ bold: string; desc: string }> }}
-                    onChange={handleBulletListContentChange}
+                    onChange={handleBlockContentChange}
+                  />
+                </div>
+              )}
+              {selectedBlock.type === 'chart' && (
+                <div className="mt-2">
+                  <ChartEditor
+                    block={selectedBlock}
+                    onUpdate={(updates) => onBlockUpdate(selectedBlock.id, updates)}
                   />
                 </div>
               )}
             </div>
 
+            {/* Timing Settings */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs">Start Time (ms)</Label>
+                <Label>Start Time (ms)</Label>
                 <Input
                   type="number"
                   value={selectedBlock.startTime}
-                  onChange={(e) => handleBlockConfigChange('startTime', Math.round(parseInt(e.target.value) || 0))}
-                  className="mt-2"
+                  onChange={(e) => handleBlockPropertyChange('startTime', parseInt(e.target.value) || 0)}
                 />
               </div>
               <div>
-                <Label className="text-xs">Duration (ms)</Label>
+                <Label>Duration (ms)</Label>
                 <Input
                   type="number"
                   value={selectedBlock.duration}
-                  onChange={(e) => handleBlockConfigChange('duration', Math.round(parseInt(e.target.value) || 1000))}
-                  className="mt-2"
+                  onChange={(e) => handleBlockPropertyChange('duration', parseInt(e.target.value) || 1000)}
                 />
               </div>
             </div>
 
-            <div>
-              <Label className="text-xs">Easing Curve</Label>
-              {isBlockCustom ? (
-                <div className="mt-2 space-y-2">
-                  <Input
-                    placeholder="e.g., cubic-bezier(0.25, 0.1, 0.25, 1) or ease-in-out"
-                    value={selectedBlock.animationConfig.curve}
-                    onChange={(e) => handleBlockCustomCurveChange(e.target.value)}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsBlockCustom(false)}
-                    className="text-xs"
-                  >
-                    Back to presets
-                  </Button>
-                </div>
-              ) : (
-                <Select
-                  value={getCurrentBlockCurveValue()}
-                  onValueChange={handleBlockCurveChange}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {easingCurves.map(curve => (
-                      <SelectItem key={curve.value} value={curve.value}>
-                        {curve.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-
-            {selectedBlock.type === 'paragraph' && (
+            {/* Animation Settings - only for non-chart blocks */}
+            {selectedBlock.type !== 'chart' && (
               <>
                 <div>
-                  <Label className="text-xs">Character Fade Delay (ms)</Label>
-                  <Slider
-                    value={[selectedBlock.animationConfig.charFadeDelay]}
-                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.charFadeDelay', Math.round(value))}
-                    min={1}
-                    max={20}
-                    step={1}
-                    className="mt-2"
-                  />
-                  <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.charFadeDelay)}ms</div>
+                  <Label>Easing Curve</Label>
+                  <Select 
+                    value={selectedBlock.animationConfig.curve} 
+                    onValueChange={(value) => handleAnimationConfigChange('curve', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cubic-bezier(0.45,0,0.58,1)">Ease Out</SelectItem>
+                      <SelectItem value="cubic-bezier(0.00,0.00,0.00,1.00)">Ease In</SelectItem>
+                      <SelectItem value="cubic-bezier(0.45,0.45,0.55,1)">Ease In Out</SelectItem>
+                      <SelectItem value="linear">Linear</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <Label className="text-xs">Mask Fade Delay (ms)</Label>
-                  <Slider
-                    value={[selectedBlock.animationConfig.maskFadeDelay]}
-                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.maskFadeDelay', Math.round(value))}
-                    min={0}
-                    max={500}
-                    step={10}
-                    className="mt-2"
+                  <Label>Character Fade Delay (ms)</Label>
+                  <Input
+                    type="number"
+                    value={selectedBlock.animationConfig.charFadeDelay}
+                    onChange={(e) => handleAnimationConfigChange('charFadeDelay', parseInt(e.target.value) || 0)}
                   />
-                  <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.maskFadeDelay)}ms</div>
                 </div>
 
                 <div>
-                  <Label className="text-xs">Mask Fade Duration (ms)</Label>
-                  <Slider
-                    value={[selectedBlock.animationConfig.maskFadeDuration]}
-                    onValueChange={([value]) => handleBlockConfigChange('animationConfig.maskFadeDuration', Math.round(value))}
-                    min={100}
-                    max={1000}
-                    step={50}
-                    className="mt-2"
+                  <Label>Mask Fade Delay (ms)</Label>
+                  <Input
+                    type="number"
+                    value={selectedBlock.animationConfig.maskFadeDelay}
+                    onChange={(e) => handleAnimationConfigChange('maskFadeDelay', parseInt(e.target.value) || 0)}
                   />
-                  <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.maskFadeDuration)}ms</div>
                 </div>
+
+                <div>
+                  <Label>Mask Fade Duration (ms)</Label>
+                  <Input
+                    type="number"
+                    value={selectedBlock.animationConfig.maskFadeDuration}
+                    onChange={(e) => handleAnimationConfigChange('maskFadeDuration', parseInt(e.target.value) || 0)}
+                  />
+                </div>
+
+                {selectedBlock.type === 'bulletList' && (
+                  <div>
+                    <Label>Stagger Delay (ms)</Label>
+                    <Input
+                      type="number"
+                      value={selectedBlock.animationConfig.staggerDelay || 0}
+                      onChange={(e) => handleAnimationConfigChange('staggerDelay', parseInt(e.target.value) || 0)}
+                    />
+                  </div>
+                )}
               </>
             )}
-
-            {selectedBlock.type === 'bulletList' && (
-              <div>
-                <Label className="text-xs">Stagger Delay (ms)</Label>
-                <Slider
-                  value={[selectedBlock.animationConfig.staggerDelay || 100]}
-                  onValueChange={([value]) => handleBlockConfigChange('animationConfig.staggerDelay', Math.round(value))}
-                  min={50}
-                  max={500}
-                  step={10}
-                  className="mt-2"
-                />
-                <div className="text-xs text-gray-500 mt-1">{Math.round(selectedBlock.animationConfig.staggerDelay || 100)}ms</div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center text-gray-500 text-sm">
-              Select a block on the timeline to edit its properties
-            </div>
           </CardContent>
         </Card>
       )}
