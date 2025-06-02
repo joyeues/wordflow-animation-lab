@@ -84,9 +84,9 @@ export const ChartEditor: React.FC<ChartEditorProps> = ({ block, onUpdate }) => 
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="pie">Pie Chart</SelectItem>
             <SelectItem value="bar">Bar Chart</SelectItem>
             <SelectItem value="line">Line Chart</SelectItem>
-            <SelectItem value="pie">Pie Chart</SelectItem>
             <SelectItem value="doughnut">Doughnut Chart</SelectItem>
           </SelectContent>
         </Select>

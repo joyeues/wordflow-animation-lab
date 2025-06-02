@@ -49,34 +49,14 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
 }) => {
   const { chartType, data, options } = content;
 
-  // Calculate animation progress (0 to 1)
-  const animationProgress = Math.min(currentTime / 1000, 1); // 1 second animation duration
-  
-  // Create animated data based on progress
-  const animatedData = {
-    ...data,
-    datasets: data.datasets.map((dataset: any) => ({
-      ...dataset,
-      data: dataset.data.map((value: number) => 
-        hasStarted ? value * animationProgress : 0
-      )
-    }))
-  };
-
   const renderChart = () => {
     const chartProps = { 
-      data: animatedData, 
+      data, 
       options: {
         ...options,
         animation: {
-          duration: 0 // Disable chart.js internal animations since we're controlling it
-        },
-        plugins: {
-          ...options?.plugins,
-          legend: {
-            ...options?.plugins?.legend,
-            display: hasStarted ? options?.plugins?.legend?.display !== false : false
-          }
+          duration: 1000, // Enable Chart.js native animations
+          easing: 'easeOutQuart'
         }
       }
     };
@@ -91,7 +71,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
       case 'doughnut':
         return <Doughnut {...chartProps} />;
       default:
-        return <Bar {...chartProps} />;
+        return <Pie {...chartProps} />;
     }
   };
 
@@ -102,10 +82,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
       } ${className || ''}`}
       style={{ 
         height: '400px', 
-        width: '100%',
-        transform: hasStarted 
-          ? `translateY(0px) scale(${0.95 + (0.05 * animationProgress)})` 
-          : 'translateY(20px) scale(0.95)'
+        width: '100%'
       }}
     >
       {renderChart()}
