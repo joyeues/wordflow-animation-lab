@@ -56,19 +56,9 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
     }
   };
 
-  const handleContentChange = (value: string) => {
-    if (!selectedBlock) return;
-    
-    if (selectedBlock.type === 'paragraph') {
-      onBlockUpdate(selectedBlock.id, { content: value });
-    } else if (selectedBlock.type === 'bulletList' && typeof selectedBlock.content === 'object') {
-      try {
-        const parsed = JSON.parse(value);
-        onBlockUpdate(selectedBlock.id, { content: parsed });
-      } catch (e) {
-        // Invalid JSON, don't update
-      }
-    }
+  const handleParagraphContentChange = (value: string) => {
+    if (!selectedBlock || selectedBlock.type !== 'paragraph') return;
+    onBlockUpdate(selectedBlock.id, { content: value });
   };
 
   const handleBulletListContentChange = (content: { title: string; items: Array<{ bold: string; desc: string }> }) => {
@@ -215,7 +205,7 @@ export const AnimationControlPanel: React.FC<AnimationControlPanelProps> = ({
               {selectedBlock.type === 'paragraph' ? (
                 <Textarea
                   value={selectedBlock.content as string}
-                  onChange={(e) => handleContentChange(e.target.value)}
+                  onChange={(e) => handleParagraphContentChange(e.target.value)}
                   className="mt-2"
                   rows={4}
                   placeholder="Enter paragraph text..."
