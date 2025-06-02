@@ -54,6 +54,13 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
 
   // Show chart when it becomes active and keep it visible once it has been active
   useEffect(() => {
+    // Reset hasBeenActive when scrubbing back to before start time
+    if (!hasStarted && hasBeenActive) {
+      setHasBeenActive(false);
+      setShouldRender(false);
+      return;
+    }
+
     if (isActive && !shouldRender) {
       setShouldRender(true);
       setHasBeenActive(true);
