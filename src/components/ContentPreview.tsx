@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ParagraphBlock } from './ParagraphBlock';
 import { BulletListBlock } from './BulletListBlock';
@@ -38,7 +39,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
   };
 
   return (
-    <div className="h-full bg-gray-50 p-8 overflow-auto relative" onClick={handleBackgroundClick}>
+    <div className="h-full bg-gray-50 p-8 overflow-auto relative flex flex-col items-center" onClick={handleBackgroundClick}>
       {contentBlocks.map((block) => {
         const isVisible = currentTime >= block.startTime;
         const isActive = currentTime >= block.startTime && currentTime <= block.startTime + block.duration;
@@ -46,7 +47,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
         const isSelected = selectedBlockIds.includes(block.id);
 
         return (
-          <div key={block.id} className="relative mb-8">
+          <div key={block.id} className="relative mb-8 w-full max-w-4xl">
             {/* Selection overlay */}
             {isSelected && (
               <div className="absolute -inset-4 border-2 border-blue-400 rounded-lg bg-blue-50 bg-opacity-50 pointer-events-none" />
