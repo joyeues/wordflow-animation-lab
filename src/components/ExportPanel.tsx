@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { X, Copy, Download } from 'lucide-react';
+import { X, Copy, Download, Github } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { ContentBlock, AnimationConfig } from '@/pages/Index';
 
@@ -23,7 +22,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   contentBlocks,
   globalConfig
 }) => {
-  const [selectedFormat, setSelectedFormat] = useState<'component' | 'hooks' | 'config'>('component');
+  const [selectedFormat, setSelectedFormat] = useState<'react' | 'vue' | 'angular' | 'svelte' | 'vanilla' | 'framer' | 'gsap' | 'github'>('react');
   const [animationOnly, setAnimationOnly] = useState(false);
 
   const generateAnimationData = () => {
@@ -261,6 +260,805 @@ const AnimatedTextStudio = () => {
 };
 
 export default AnimatedTextStudio;`;
+  };
+
+  const generateVueComponent = () => {
+    if (animationOnly) {
+      return `<!-- Vue 3 Animation Controller -->
+<template>
+  <div class="animation-controller">
+    <div class="controls mb-4">
+      <button
+        @click="togglePlay"
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        {{ isPlaying ? 'Pause' : 'Play' }}
+      </button>
+      <span class="ml-4">Time: {{ Math.round(currentTime) }}ms</span>
+    </div>
+    
+    <div class="active-animations">
+      <div 
+        v-for="block in getActiveBlocks()" 
+        :key="block.id" 
+        class="animation-block mb-2 p-2 border rounded"
+      >
+        <div>Block ID: {{ block.id }}</div>
+        <div>Type: {{ block.type }}</div>
+        <div>Progress: {{ Math.round(getBlockProgress(block) * 100) }}%</div>
+        <div>Config: {{ JSON.stringify(block.animationConfig) }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onUnmounted, watch } from 'vue'
+
+const currentTime = ref(0)
+const isPlaying = ref(false)
+let animationFrame: number | null = null
+
+// Animation configuration data
+const animationData = ${JSON.stringify(generateAnimationData(), null, 2)}
+
+const togglePlay = () => {
+  isPlaying.value = !isPlaying.value
+}
+
+const getActiveBlocks = () => {
+  return animationData.contentBlocks.filter(block => 
+    currentTime.value >= block.startTime && 
+    currentTime.value <= block.startTime + block.duration
+  )
+}
+
+const getBlockProgress = (block: any) => {
+  const adjustedTime = Math.max(0, currentTime.value - block.startTime)
+  return Math.min(1, adjustedTime / block.duration)
+}
+
+watch(isPlaying, (playing) => {
+  if (playing) {
+    const startTime = Date.now() - currentTime.value
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      currentTime.value = elapsed
+      
+      if (elapsed < animationData.totalDuration) {
+        animationFrame = requestAnimationFrame(animate)
+      } else {
+        isPlaying.value = false
+      }
+    }
+    
+    animationFrame = requestAnimationFrame(animate)
+  } else {
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame)
+    }
+  }
+})
+
+onUnmounted(() => {
+  if (animationFrame) {
+    cancelAnimationFrame(animationFrame)
+  }
+})
+</script>`;
+    }
+
+    return `<!-- Vue 3 Animated Text Component -->
+<template>
+  <div class="min-h-screen bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto space-y-8">
+      <button
+        @click="togglePlay"
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        {{ isPlaying ? 'Pause' : 'Play' }}
+      </button>
+      
+      <div v-for="block in contentBlocks" :key="block.id">
+        <ParagraphBlock
+          v-if="block.type === 'paragraph'"
+          :content="block.content"
+          :animationConfig="block.animationConfig"
+          :currentTime="getAdjustedTime(block)"
+          :isActive="isBlockActive(block)"
+        />
+        <BulletListBlock
+          v-else
+          :content="block.content"
+          :animationConfig="block.animationConfig"
+          :currentTime="getAdjustedTime(block)"
+          :isActive="isBlockActive(block)"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onUnmounted, watch } from 'vue'
+
+const isPlaying = ref(false)
+const currentTime = ref(0)
+let animationFrame: number | null = null
+
+const contentBlocks = ${JSON.stringify(contentBlocks, null, 2)}
+const globalConfig = ${JSON.stringify(globalConfig, null, 2)}
+
+// Component logic here...
+</script>`;
+  };
+
+  const generateAngularComponent = () => {
+    if (animationOnly) {
+      return `// Angular Animation Controller
+import { Component, OnInit, OnDestroy } from '@angular/core';
+
+interface AnimationBlock {
+  id: string;
+  type: string;
+  startTime: number;
+  duration: number;
+  animationConfig: any;
+}
+
+@Component({
+  selector: 'app-animation-controller',
+  template: \`
+    <div class="animation-controller">
+      <div class="controls mb-4">
+        <button
+          (click)="togglePlay()"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          {{ isPlaying ? 'Pause' : 'Play' }}
+        </button>
+        <span class="ml-4">Time: {{ Math.round(currentTime) }}ms</span>
+      </div>
+      
+      <div class="active-animations">
+        <div 
+          *ngFor="let block of getActiveBlocks()" 
+          class="animation-block mb-2 p-2 border rounded"
+        >
+          <div>Block ID: {{ block.id }}</div>
+          <div>Type: {{ block.type }}</div>
+          <div>Progress: {{ Math.round(getBlockProgress(block) * 100) }}%</div>
+        </div>
+      </div>
+    </div>
+  \`
+})
+export class AnimationControllerComponent implements OnInit, OnDestroy {
+  currentTime = 0;
+  isPlaying = false;
+  private animationFrame?: number;
+
+  // Animation configuration data
+  private animationData = ${JSON.stringify(generateAnimationData(), null, 2)};
+
+  togglePlay(): void {
+    this.isPlaying = !this.isPlaying;
+    if (this.isPlaying) {
+      this.startAnimation();
+    } else {
+      this.stopAnimation();
+    }
+  }
+
+  getActiveBlocks(): AnimationBlock[] {
+    return this.animationData.contentBlocks.filter(block => 
+      this.currentTime >= block.startTime && 
+      this.currentTime <= block.startTime + block.duration
+    );
+  }
+
+  getBlockProgress(block: AnimationBlock): number {
+    const adjustedTime = Math.max(0, this.currentTime - block.startTime);
+    return Math.min(1, adjustedTime / block.duration);
+  }
+
+  private startAnimation(): void {
+    const startTime = Date.now() - this.currentTime;
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      this.currentTime = elapsed;
+      
+      if (elapsed < this.animationData.totalDuration) {
+        this.animationFrame = requestAnimationFrame(animate);
+      } else {
+        this.isPlaying = false;
+      }
+    };
+    
+    this.animationFrame = requestAnimationFrame(animate);
+  }
+
+  private stopAnimation(): void {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+  }
+
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    this.stopAnimation();
+  }
+}`;
+    }
+
+    return `// Angular Animated Text Component
+import { Component, OnInit, OnDestroy } from '@angular/core';
+
+@Component({
+  selector: 'app-animated-text',
+  template: \`
+    <div class="min-h-screen bg-gray-50 p-8">
+      <div class="max-w-2xl mx-auto space-y-8">
+        <button
+          (click)="togglePlay()"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          {{ isPlaying ? 'Pause' : 'Play' }}
+        </button>
+        
+        <div *ngFor="let block of contentBlocks">
+          <!-- Block rendering logic -->
+        </div>
+      </div>
+    </div>
+  \`
+})
+export class AnimatedTextComponent implements OnInit, OnDestroy {
+  // Component implementation
+}`;
+  };
+
+  const generateSvelteComponent = () => {
+    if (animationOnly) {
+      return `<!-- Svelte Animation Controller -->
+<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+  
+  let currentTime = 0;
+  let isPlaying = false;
+  let animationFrame: number;
+
+  // Animation configuration data
+  const animationData = ${JSON.stringify(generateAnimationData(), null, 2)};
+
+  function togglePlay() {
+    isPlaying = !isPlaying;
+    if (isPlaying) {
+      startAnimation();
+    } else {
+      stopAnimation();
+    }
+  }
+
+  function getActiveBlocks() {
+    return animationData.contentBlocks.filter(block => 
+      currentTime >= block.startTime && 
+      currentTime <= block.startTime + block.duration
+    );
+  }
+
+  function getBlockProgress(block: any) {
+    const adjustedTime = Math.max(0, currentTime - block.startTime);
+    return Math.min(1, adjustedTime / block.duration);
+  }
+
+  function startAnimation() {
+    const startTime = Date.now() - currentTime;
+    
+    function animate() {
+      const elapsed = Date.now() - startTime;
+      currentTime = elapsed;
+      
+      if (elapsed < animationData.totalDuration) {
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        isPlaying = false;
+      }
+    }
+    
+    animationFrame = requestAnimationFrame(animate);
+  }
+
+  function stopAnimation() {
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
+  }
+
+  onDestroy(() => {
+    stopAnimation();
+  });
+</script>
+
+<div class="animation-controller">
+  <div class="controls mb-4">
+    <button
+      on:click={togglePlay}
+      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      {isPlaying ? 'Pause' : 'Play'}
+    </button>
+    <span class="ml-4">Time: {Math.round(currentTime)}ms</span>
+  </div>
+  
+  <div class="active-animations">
+    {#each getActiveBlocks() as block (block.id)}
+      <div class="animation-block mb-2 p-2 border rounded">
+        <div>Block ID: {block.id}</div>
+        <div>Type: {block.type}</div>
+        <div>Progress: {Math.round(getBlockProgress(block) * 100)}%</div>
+      </div>
+    {/each}
+  </div>
+</div>`;
+    }
+
+    return `<!-- Svelte Animated Text Component -->
+<script lang="ts">
+  // Full Svelte component implementation
+</script>
+
+<div class="min-h-screen bg-gray-50 p-8">
+  <!-- Component template -->
+</div>`;
+  };
+
+  const generateVanillaJS = () => {
+    if (animationOnly) {
+      return `// Vanilla JavaScript Animation Controller
+class AnimationController {
+  constructor(container) {
+    this.container = container;
+    this.currentTime = 0;
+    this.isPlaying = false;
+    this.animationFrame = null;
+    
+    // Animation configuration data
+    this.animationData = ${JSON.stringify(generateAnimationData(), null, 2)};
+    
+    this.init();
+  }
+
+  init() {
+    this.container.innerHTML = \`
+      <div class="animation-controller">
+        <div class="controls mb-4">
+          <button id="playBtn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Play
+          </button>
+          <span id="timeDisplay" class="ml-4">Time: 0ms</span>
+        </div>
+        <div id="activeAnimations" class="active-animations"></div>
+      </div>
+    \`;
+
+    this.playBtn = this.container.querySelector('#playBtn');
+    this.timeDisplay = this.container.querySelector('#timeDisplay');
+    this.activeAnimations = this.container.querySelector('#activeAnimations');
+
+    this.playBtn.addEventListener('click', () => this.togglePlay());
+  }
+
+  togglePlay() {
+    this.isPlaying = !this.isPlaying;
+    this.playBtn.textContent = this.isPlaying ? 'Pause' : 'Play';
+    
+    if (this.isPlaying) {
+      this.startAnimation();
+    } else {
+      this.stopAnimation();
+    }
+  }
+
+  getActiveBlocks() {
+    return this.animationData.contentBlocks.filter(block => 
+      this.currentTime >= block.startTime && 
+      this.currentTime <= block.startTime + block.duration
+    );
+  }
+
+  getBlockProgress(block) {
+    const adjustedTime = Math.max(0, this.currentTime - block.startTime);
+    return Math.min(1, adjustedTime / block.duration);
+  }
+
+  startAnimation() {
+    const startTime = Date.now() - this.currentTime;
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      this.currentTime = elapsed;
+      this.timeDisplay.textContent = \`Time: \${Math.round(elapsed)}ms\`;
+      
+      // Update active blocks display
+      const activeBlocks = this.getActiveBlocks();
+      this.activeAnimations.innerHTML = activeBlocks.map(block => \`
+        <div class="animation-block mb-2 p-2 border rounded">
+          <div>Block ID: \${block.id}</div>
+          <div>Type: \${block.type}</div>
+          <div>Progress: \${Math.round(this.getBlockProgress(block) * 100)}%</div>
+        </div>
+      \`).join('');
+      
+      if (elapsed < this.animationData.totalDuration) {
+        this.animationFrame = requestAnimationFrame(animate);
+      } else {
+        this.isPlaying = false;
+        this.playBtn.textContent = 'Play';
+      }
+    };
+    
+    this.animationFrame = requestAnimationFrame(animate);
+  }
+
+  stopAnimation() {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+  }
+}
+
+// Usage
+// const controller = new AnimationController(document.getElementById('app'));`;
+    }
+
+    return `// Vanilla JavaScript Animated Text
+class AnimatedTextStudio {
+  constructor(container) {
+    this.container = container;
+    // Implementation here
+  }
+}`;
+  };
+
+  const generateFramerMotion = () => {
+    if (animationOnly) {
+      return `// Framer Motion Animation Configuration
+import { motion, useAnimation, AnimationControls } from 'framer-motion';
+import { useState, useEffect } from 'react';
+
+const animationData = ${JSON.stringify(generateAnimationData(), null, 2)};
+
+export const useAnimationTimeline = () => {
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const controls = useAnimation();
+
+  const variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const charVariants = {
+    hidden: { opacity: 0 },
+    visible: (i: number) => ({
+      opacity: 1,
+      transition: {
+        delay: i * 0.004, // Based on charFadeDelay
+        duration: 0.32,
+        ease: [0.45, 0, 0.58, 1]
+      }
+    })
+  };
+
+  const staggerVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.2 + (i * 0.1), // maskFadeDelay + staggerDelay
+        duration: 0.4,
+        ease: [0, 0, 0, 1]
+      }
+    })
+  };
+
+  return {
+    currentTime,
+    isPlaying,
+    setIsPlaying,
+    controls,
+    variants,
+    charVariants,
+    staggerVariants,
+    animationData
+  };
+};
+
+// Example Framer Motion Component
+export const FramerAnimationController = () => {
+  const { 
+    currentTime, 
+    isPlaying, 
+    setIsPlaying, 
+    variants, 
+    charVariants,
+    animationData 
+  } = useAnimationTimeline();
+
+  return (
+    <div className="animation-controller">
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsPlaying(!isPlaying)}
+        className="px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        {isPlaying ? 'Pause' : 'Play'}
+      </motion.button>
+
+      <motion.div
+        variants={variants}
+        initial="hidden"
+        animate="visible"
+        className="active-animations"
+      >
+        {animationData.contentBlocks.map((block, index) => (
+          <motion.div
+            key={block.id}
+            variants={variants}
+            custom={index}
+            className="animation-block"
+          >
+            Block: {block.id}
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
+  );
+};`;
+    }
+
+    return `// Framer Motion Complete Component
+import { motion } from 'framer-motion';
+// Full implementation with Framer Motion animations`;
+  };
+
+  const generateGSAP = () => {
+    if (animationOnly) {
+      return `// GSAP Animation Controller
+import { gsap } from 'gsap';
+
+class GSAPAnimationController {
+  constructor(container) {
+    this.container = container;
+    this.timeline = gsap.timeline({ paused: true });
+    this.currentTime = 0;
+    this.isPlaying = false;
+    
+    // Animation configuration data
+    this.animationData = ${JSON.stringify(generateAnimationData(), null, 2)};
+    
+    this.init();
+    this.setupTimeline();
+  }
+
+  init() {
+    this.container.innerHTML = \`
+      <div class="animation-controller">
+        <div class="controls">
+          <button id="playBtn">Play</button>
+          <button id="pauseBtn">Pause</button>
+          <button id="restartBtn">Restart</button>
+          <div id="progress">Progress: 0%</div>
+        </div>
+        <div id="content"></div>
+      </div>
+    \`;
+
+    this.playBtn = this.container.querySelector('#playBtn');
+    this.pauseBtn = this.container.querySelector('#pauseBtn');
+    this.restartBtn = this.container.querySelector('#restartBtn');
+    this.progress = this.container.querySelector('#progress');
+    this.content = this.container.querySelector('#content');
+
+    this.playBtn.addEventListener('click', () => this.play());
+    this.pauseBtn.addEventListener('click', () => this.pause());
+    this.restartBtn.addEventListener('click', () => this.restart());
+  }
+
+  setupTimeline() {
+    // Create timeline based on animation data
+    this.animationData.contentBlocks.forEach(block => {
+      const startTime = block.startTime / 1000; // Convert to seconds
+      
+      if (block.type === 'paragraph') {
+        // Character-by-character animation
+        const chars = block.content.split('').map((char, i) => {
+          const element = document.createElement('span');
+          element.textContent = char === ' ' ? ' ' : char;
+          element.style.opacity = '0';
+          return element;
+        });
+        
+        this.timeline.to(chars, {
+          opacity: 1,
+          duration: 0.32,
+          stagger: block.animationConfig.charFadeDelay / 1000,
+          ease: "power2.out"
+        }, startTime);
+        
+      } else if (block.type === 'bulletList') {
+        // Staggered list animation
+        const items = block.content.items.map((item, i) => {
+          const element = document.createElement('div');
+          element.innerHTML = \`<strong>\${item.bold}</strong> – \${item.desc}\`;
+          element.style.opacity = '0';
+          element.style.transform = 'translateY(40px)';
+          return element;
+        });
+        
+        this.timeline.to(items, {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          stagger: block.animationConfig.staggerDelay / 1000,
+          ease: "expo.out"
+        }, startTime + (block.animationConfig.maskFadeDelay / 1000));
+      }
+    });
+
+    // Update progress
+    this.timeline.eventCallback("onUpdate", () => {
+      const progress = (this.timeline.progress() * 100).toFixed(1);
+      this.progress.textContent = \`Progress: \${progress}%\`;
+    });
+  }
+
+  play() {
+    this.timeline.play();
+    this.isPlaying = true;
+  }
+
+  pause() {
+    this.timeline.pause();
+    this.isPlaying = false;
+  }
+
+  restart() {
+    this.timeline.restart();
+    this.isPlaying = true;
+  }
+}
+
+// Usage
+// const controller = new GSAPAnimationController(document.getElementById('app'));`;
+    }
+
+    return `// GSAP Complete Animation Setup
+import { gsap } from 'gsap';
+// Full GSAP implementation`;
+  };
+
+  const generateGitHubFiles = () => {
+    const readmeContent = `# Animated Text Studio Export
+
+This project contains animation timing data and components exported from Animated Text Studio.
+
+## Animation Data
+
+The following animation blocks were exported:
+
+${contentBlocks.map(block => `
+### Block ${block.id} (${block.type})
+- **Start Time:** ${block.startTime}ms
+- **Duration:** ${block.duration}ms
+- **Animation Config:**
+  - Character Fade Delay: ${block.animationConfig.charFadeDelay}ms
+  - Mask Fade Delay: ${block.animationConfig.maskFadeDelay}ms
+  - Curve: ${block.animationConfig.curve}
+  ${block.animationConfig.staggerDelay ? `- Stagger Delay: ${block.animationConfig.staggerDelay}ms` : ''}
+`).join('')}
+
+## Global Configuration
+
+- **Global Speed:** ${globalConfig.globalSpeed}x
+- **Default Curve:** ${globalConfig.curve}
+- **Default Character Fade Delay:** ${globalConfig.charFadeDelay}ms
+- **Default Mask Fade Delay:** ${globalConfig.maskFadeDelay}ms
+
+## Files Included
+
+- \`animation-data.json\` - Raw animation timing data
+- \`react-component.tsx\` - React implementation
+- \`package.json\` - Dependencies and scripts
+- \`README.md\` - This documentation
+
+## Getting Started
+
+\`\`\`bash
+npm install
+npm start
+\`\`\`
+
+## Usage
+
+Import the animation data and use it with your preferred animation library.
+
+\`\`\`javascript
+import animationData from './animation-data.json';
+// Use with React, Vue, Angular, or any other framework
+\`\`\`
+`;
+
+    const packageJson = `{
+  "name": "animated-text-studio-export",
+  "version": "1.0.0",
+  "description": "Animation timing data exported from Animated Text Studio",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "keywords": ["animation", "text", "timing", "react"],
+  "author": "Animated Text Studio",
+  "license": "MIT"
+}`;
+
+    return `# GitHub Repository Files
+
+## README.md
+\`\`\`markdown
+${readmeContent}
+\`\`\`
+
+## package.json
+\`\`\`json
+${packageJson}
+\`\`\`
+
+## animation-data.json
+\`\`\`json
+${JSON.stringify(generateAnimationData(), null, 2)}
+\`\`\`
+
+## Instructions
+
+1. Create a new GitHub repository
+2. Copy each file content to the respective files
+3. Commit and push to your repository
+4. The animation data will be available for integration into any project
+
+## Additional Files You Can Add
+
+- **TypeScript Definitions:** Create \`types.d.ts\` for TypeScript projects
+- **CSS Animations:** Create \`animations.css\` with pure CSS implementations
+- **Documentation:** Add more detailed docs in \`docs/\` folder
+- **Examples:** Create \`examples/\` folder with different framework implementations`;
   };
 
   const generateHooks = () => {
@@ -608,14 +1406,30 @@ export const timingFunctions = {
     });
   };
 
+  const handleGitHubExport = () => {
+    const repoContent = generateGitHubFiles();
+    const timestamp = new Date().toISOString().split('T')[0];
+    handleDownload(repoContent, `github-repository-${timestamp}.md`);
+  };
+
   const getContent = () => {
     switch (selectedFormat) {
-      case 'component':
+      case 'react':
         return generateReactComponent();
-      case 'hooks':
-        return generateHooks();
-      case 'config':
-        return generateConfig();
+      case 'vue':
+        return generateVueComponent();
+      case 'angular':
+        return generateAngularComponent();
+      case 'svelte':
+        return generateSvelteComponent();
+      case 'vanilla':
+        return generateVanillaJS();
+      case 'framer':
+        return generateFramerMotion();
+      case 'gsap':
+        return generateGSAP();
+      case 'github':
+        return generateGitHubFiles();
       default:
         return '';
     }
@@ -624,12 +1438,22 @@ export const timingFunctions = {
   const getFilename = () => {
     const prefix = animationOnly ? 'animation-' : '';
     switch (selectedFormat) {
-      case 'component':
+      case 'react':
         return `${prefix}component.tsx`;
-      case 'hooks':
-        return `${prefix}hooks.ts`;
-      case 'config':
-        return `${prefix}config.ts`;
+      case 'vue':
+        return `${prefix}component.vue`;
+      case 'angular':
+        return `${prefix}component.ts`;
+      case 'svelte':
+        return `${prefix}component.svelte`;
+      case 'vanilla':
+        return `${prefix}script.js`;
+      case 'framer':
+        return `${prefix}framer-motion.tsx`;
+      case 'gsap':
+        return `${prefix}gsap.js`;
+      case 'github':
+        return `repository-files.md`;
       default:
         return 'export.txt';
     }
@@ -641,7 +1465,7 @@ export const timingFunctions = {
     <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-white border-l shadow-lg z-10 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold">Export to React</h2>
+        <h2 className="text-lg font-semibold">Export Animation</h2>
         <Button variant="ghost" size="sm" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>
@@ -667,15 +1491,20 @@ export const timingFunctions = {
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         <Tabs value={selectedFormat} onValueChange={(value) => setSelectedFormat(value as any)} className="h-full flex flex-col">
-          <TabsList className="mx-4 mt-4">
-            <TabsTrigger value="component">
-              {animationOnly ? 'Animation Controller' : 'Full Component'}
-            </TabsTrigger>
-            <TabsTrigger value="hooks">
-              {animationOnly ? 'Timing Hooks' : 'Custom Hooks'}
-            </TabsTrigger>
-            <TabsTrigger value="config">
-              {animationOnly ? 'Pure Config' : 'Config & CSS'}
+          <TabsList className="mx-4 mt-4 grid grid-cols-4 gap-1">
+            <TabsTrigger value="react" className="text-xs">React</TabsTrigger>
+            <TabsTrigger value="vue" className="text-xs">Vue</TabsTrigger>
+            <TabsTrigger value="angular" className="text-xs">Angular</TabsTrigger>
+            <TabsTrigger value="svelte" className="text-xs">Svelte</TabsTrigger>
+          </TabsList>
+          
+          <TabsList className="mx-4 mt-2 grid grid-cols-4 gap-1">
+            <TabsTrigger value="vanilla" className="text-xs">Vanilla JS</TabsTrigger>
+            <TabsTrigger value="framer" className="text-xs">Framer</TabsTrigger>
+            <TabsTrigger value="gsap" className="text-xs">GSAP</TabsTrigger>
+            <TabsTrigger value="github" className="text-xs">
+              <Github className="w-3 h-3 mr-1" />
+              GitHub
             </TabsTrigger>
           </TabsList>
 
@@ -684,27 +1513,45 @@ export const timingFunctions = {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center justify-between">
                   <span>
-                    {selectedFormat === 'component' && (animationOnly ? 'Animation Controller' : 'React Component')}
-                    {selectedFormat === 'hooks' && (animationOnly ? 'Animation Timing Hooks' : 'Custom Hooks')}
-                    {selectedFormat === 'config' && (animationOnly ? 'Animation Configuration' : 'Configuration & Styles')}
+                    {selectedFormat === 'react' && (animationOnly ? 'React Animation Controller' : 'React Component')}
+                    {selectedFormat === 'vue' && (animationOnly ? 'Vue Animation Controller' : 'Vue Component')}
+                    {selectedFormat === 'angular' && (animationOnly ? 'Angular Animation Controller' : 'Angular Component')}
+                    {selectedFormat === 'svelte' && (animationOnly ? 'Svelte Animation Controller' : 'Svelte Component')}
+                    {selectedFormat === 'vanilla' && (animationOnly ? 'Vanilla JS Animation Controller' : 'Vanilla JS Component')}
+                    {selectedFormat === 'framer' && (animationOnly ? 'Framer Motion Configuration' : 'Framer Motion Component')}
+                    {selectedFormat === 'gsap' && (animationOnly ? 'GSAP Animation Controller' : 'GSAP Component')}
+                    {selectedFormat === 'github' && 'GitHub Repository Files'}
                   </span>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopy(getContent())}
-                    >
-                      <Copy className="w-3 h-3 mr-2" />
-                      Copy
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(getContent(), getFilename())}
-                    >
-                      <Download className="w-3 h-3 mr-2" />
-                      Download
-                    </Button>
+                    {selectedFormat === 'github' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGitHubExport}
+                      >
+                        <Download className="w-3 h-3 mr-2" />
+                        Export
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopy(getContent())}
+                        >
+                          <Copy className="w-3 h-3 mr-2" />
+                          Copy
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(getContent(), getFilename())}
+                        >
+                          <Download className="w-3 h-3 mr-2" />
+                          Download
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardTitle>
               </CardHeader>
