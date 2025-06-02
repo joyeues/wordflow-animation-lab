@@ -50,27 +50,32 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({
   const { chartType, data, options } = content;
   const chartRef = useRef<any>(null);
   const hasAnimatedRef = useRef(false);
+  const forceAnimationRef = useRef(false);
 
   // Reset animation when block becomes inactive
   useEffect(() => {
     if (!isActive) {
       hasAnimatedRef.current = false;
+      forceAnimationRef.current = false;
     }
   }, [isActive]);
 
   // Trigger animation when the block becomes active for the first time
   useEffect(() => {
-    if (isActive && !hasAnimatedRef.current && chartRef.current) {
+    if (isActive && !hasAnimatedRef.current) {
       hasAnimatedRef.current = true;
-      // Destroy and recreate the chart to trigger fresh animation
-      chartRef.current.destroy();
-      // Small delay to ensure clean recreation
-      setTimeout(() => {
-        if (chartRef.current) {
-          chartRef.current.update('none'); // Update without animation first
-          chartRef.current.update('active'); // Then trigger animation
+      forceAnimationRef.current = true;
+      
+      // Use a timeout to ensure the chart is fully mounted before triggering animation
+      const timeoutId = setTimeout(() => {
+        if (chartRef.current && forceAnimationRef.current) {
+          // Trigger animation by updating the chart
+          chartRef.current.update('active');
+          forceAnimationRef.current = false;
         }
-      }, 50);
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [isActive]);
 
